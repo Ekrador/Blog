@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace Blog.Controllers
 {
-    internal class PostController : Controller
+    public class PostController : Controller
     {
         private readonly IPostService _postService;
         private readonly UserManager<User> _userManager;
@@ -25,7 +25,7 @@ namespace Blog.Controllers
 
         [Authorize]
         [HttpPost]
-        [Route("Create")]
+        [Route("Post/Create")]
         public async Task<IActionResult> CreatePost(CreatePostViewModel model)
         {
             if (ModelState.IsValid)
@@ -49,7 +49,7 @@ namespace Blog.Controllers
 
         [Authorize]
         [HttpPut]
-        [Route("Edit")]
+        [Route("Post/Edit")]
         public async Task<IActionResult> Edit(EditPostViewModel model)
         {
             if (ModelState.IsValid)
@@ -72,8 +72,8 @@ namespace Blog.Controllers
         }
 
         [HttpDelete]
-        [Authorize(Roles = "Администратор")]
-        [Route("RemovePost/{id}")]
+        [Authorize(Roles = "Администратор, Модератор")]
+        [Route("Post/RemovePost/{id}")]
         public async Task<IActionResult> RemovePost([FromRoute] string id)
         {
             await _postService.RemovePost(id);
@@ -81,7 +81,7 @@ namespace Blog.Controllers
         }
 
         [HttpGet]
-        [Route("AllPosts")]
+        [Route("Post/AllPosts")]
         public async Task<List<Post>> GetPosts()
         {
             var posts = await _postService.GetAllPosts();
@@ -90,7 +90,7 @@ namespace Blog.Controllers
         }
 
         [HttpGet]
-        [Route("GetAuthorsPosts/{id}")]
+        [Route("Post/GetAuthorsPosts/{id}")]
         public async Task<List<Post>> GetAuthorsPosts([FromRoute] string id)
         {
             var posts = _postService.GetAuthorsPosts(id);

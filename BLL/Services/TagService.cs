@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace BLL.Services
 {
-    internal class TagService : ITagService
+    public class TagService : ITagService
     {
         private readonly IRepository<Tag> _tagRep;
         private readonly IMapper _mapper;

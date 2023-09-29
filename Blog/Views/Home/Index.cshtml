@@ -1,8 +1,39 @@
-﻿@{
+﻿@using System.Security.Claims;
+@using BLL.Models.Users
+@model UserLoginViewModel
+@{
     ViewData["Title"] = "Home Page";
 }
 
 <div class="text-center">
-    <h1 class="display-4">2</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <h1>
+        Current User is @User.Identity.Name<br />
+        user has a role claim - @User.HasClaim(c => c.Type == ClaimTypes.Role)<br />
+        His Claims:
+    </h1>
+    @foreach (var claim in User.Claims)
+    {
+        <b>@claim.Type - @claim.Value</b>
+
+        <br />
+    }
+    <form class="frm" method="post" asp-controller="User" asp-action="Authenticate">
+        <div asp-validation-summary="ModelOnly"></div>
+        <div>
+            <div class="mrgn">
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+        </div>
+        <div>
+            <div class="mrgn">
+                <input asp-for="Password" class="form-control" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="center">
+            <input class="btn_submit" type="submit" value="Login" />
+        </div>
+    </form>
+    <a asp-action="GetAccounts" asp-controller="User" method="get" style="text-decoration:none">Accounts</a>
 </div>

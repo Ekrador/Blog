@@ -3,7 +3,6 @@ using BLL.Models.Post;
 using BLL.Services.IServices;
 using DAL.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -11,30 +10,27 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Blog.Controllers
+namespace BlogApi.Controllers
 {
-    public class CommentController : Controller
+    [ApiController]
+    [Route("controller")]
+    internal class CommentController : ControllerBase
     {
         private readonly ICommentService _commentService;
-        private readonly UserManager<User> _userManager;
-        public CommentController(ICommentService commentService, UserManager<User> userManager)
+        public CommentController(ICommentService commentService)
         {
             _commentService = commentService;
-            _userManager = userManager; 
         }
 
         [Authorize]
         [HttpPost]
-        [Route("Comment/Create")]
+        [Route("Create")]
         public async Task<IActionResult> WriteComment(CreateCommentViewModel model)
         {
             if (ModelState.IsValid)
             {
-                var user = User;
-                var result = await _userManager.GetUserAsync(user);
-                model.AuthorId = result.Id;
-                var comment = await _commentService.WriteComment(model);
-                if (comment)
+                var post = await _commentService.WriteComment(model);
+                if (post)
                 {
                     return StatusCode(200);
                 }
@@ -49,7 +45,7 @@ namespace Blog.Controllers
 
         [Authorize]
         [HttpPut]
-        [Route("Comment/Edit")]
+        [Route("Edit")]
         public async Task<IActionResult> Edit(EditCommentViewModel model)
         {
             if (ModelState.IsValid)
@@ -72,8 +68,8 @@ namespace Blog.Controllers
         }
 
         [HttpDelete]
-        [Authorize(Roles = "Администратор, Модератор")]
-        [Route("Comment/RemoveComment/{id}")]
+        [Authorize(Roles = "Администратор")]
+        [Route("RemoveComment/{id}")]
         public async Task<IActionResult> RemoveComment([FromRoute] string id)
         {
             await _commentService.RemoveComment(id);
@@ -81,7 +77,7 @@ namespace Blog.Controllers
         }
 
         [HttpGet]
-        [Route("Comment/AllComments")]
+        [Route("AllComments")]
         public async Task<List<Comment>> GetPosts()
         {
             var comment = await _commentService.GetAllComments();
@@ -90,7 +86,7 @@ namespace Blog.Controllers
         }
 
         [HttpGet]
-        [Route("Comment/GetComment/{id}")]
+        [Route("GetComment/{id}")]
         public async Task<Comment> GetComment([FromRoute] string id)
         {
             var comment = _commentService.GetComment(id);

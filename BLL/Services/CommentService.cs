@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace BLL.Services
 {
-    internal class CommentService : ICommentService
+    public class CommentService : ICommentService
     {
         private readonly IRepository<Comment> _commentRep;
         private readonly IMapper _mapper;

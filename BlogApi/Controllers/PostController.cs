@@ -1,4 +1,4 @@
-﻿using BLL.Models.Comments;
+﻿using BLL.Models;
 using BLL.Models.Post;
 using BLL.Services.IServices;
 using DAL.Models;
@@ -11,30 +11,32 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Blog.Controllers
+namespace BlogApi.Controllers
 {
-    public class CommentController : Controller
+    [ApiController]
+    [Route("controller")]
+    internal class PostController : ControllerBase
     {
-        private readonly ICommentService _commentService;
+        private readonly IPostService _postService;
         private readonly UserManager<User> _userManager;
-        public CommentController(ICommentService commentService, UserManager<User> userManager)
+        public PostController(IPostService postService, UserManager<User> userManager)
         {
-            _commentService = commentService;
-            _userManager = userManager; 
+            _postService = postService;
+            _userManager = userManager;
         }
 
         [Authorize]
         [HttpPost]
-        [Route("Comment/Create")]
-        public async Task<IActionResult> WriteComment(CreateCommentViewModel model)
+        [Route("Create")]
+        public async Task<IActionResult> CreatePost(CreatePostViewModel model)
         {
             if (ModelState.IsValid)
             {
                 var user = User;
                 var result = await _userManager.GetUserAsync(user);
                 model.AuthorId = result.Id;
-                var comment = await _commentService.WriteComment(model);
-                if (comment)
+                var post = await _postService.CreatePost(model);
+                if (post)
                 {
                     return StatusCode(200);
                 }
@@ -49,12 +51,12 @@ namespace Blog.Controllers
 
         [Authorize]
         [HttpPut]
-        [Route("Comment/Edit")]
-        public async Task<IActionResult> Edit(EditCommentViewModel model)
+        [Route("Edit")]
+        public async Task<IActionResult> Edit(EditPostViewModel model)
         {
             if (ModelState.IsValid)
             {
-                var result = await _commentService.EditComment(model);
+                var result = await _postService.EditPost(model);
                 if (result)
                 {
                     return StatusCode(200);
@@ -72,30 +74,30 @@ namespace Blog.Controllers
         }
 
         [HttpDelete]
-        [Authorize(Roles = "Администратор, Модератор")]
-        [Route("Comment/RemoveComment/{id}")]
-        public async Task<IActionResult> RemoveComment([FromRoute] string id)
+        [Authorize(Roles = "Администратор")]
+        [Route("RemovePost/{id}")]
+        public async Task<IActionResult> RemovePost([FromRoute] string id)
         {
-            await _commentService.RemoveComment(id);
+            await _postService.RemovePost(id);
             return StatusCode(200);
         }
 
         [HttpGet]
-        [Route("Comment/AllComments")]
-        public async Task<List<Comment>> GetPosts()
+        [Route("AllPosts")]
+        public async Task<List<Post>> GetPosts()
         {
-            var comment = await _commentService.GetAllComments();
+            var posts = await _postService.GetAllPosts();
 
-            return await Task.FromResult(comment);
+            return await Task.FromResult(posts);
         }
 
         [HttpGet]
-        [Route("Comment/GetComment/{id}")]
-        public async Task<Comment> GetComment([FromRoute] string id)
+        [Route("GetAuthorsPosts/{id}")]
+        public async Task<List<Post>> GetAuthorsPosts([FromRoute] string id)
         {
-            var comment = _commentService.GetComment(id);
+            var posts = _postService.GetAuthorsPosts(id);
 
-            return await Task.FromResult(comment.Result);
+            return await Task.FromResult(posts.Result);
         }
     }
 }

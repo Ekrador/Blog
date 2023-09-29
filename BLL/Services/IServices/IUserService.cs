@@ -12,13 +12,11 @@ namespace BLL.Services.IServices
     public interface IUserService
     {
         Task<IdentityResult> Register(UserRegisterViewModel model);
-
+        Task<SignInResult> Login(UserLoginViewModel model);
         Task<IdentityResult> EditAccount(UserEditViewModel model);
-
         Task RemoveAccount(string id);
-
         Task<List<User>> GetAccounts();
-
         Task<User> GetAccount(string id);
+        Task GenerateData();
     }
 }

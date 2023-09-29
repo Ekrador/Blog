@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace BLL.Services
 {
-    internal class PostService : IPostService
+    public class PostService : IPostService
     {
         private readonly IRepository<Post> _postRep;
         private readonly IMapper _mapper;

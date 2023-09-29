@@ -10,9 +10,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Blog.Controllers
+namespace BlogApi.Controllers
 {
-    public class TagController : Controller
+    [ApiController]
+    [Route("controller")]
+    internal class TagController : ControllerBase
     {
         private readonly ITagService _tagService;
         public TagController(ITagService tagService)
@@ -20,9 +22,9 @@ namespace Blog.Controllers
             _tagService = tagService;
         }
 
-        [Authorize(Roles = "Администратор, Модератор")]
+        [Authorize]
         [HttpPost]
-        [Route("Tag/Create")]
+        [Route("Create")]
         public async Task<IActionResult> CreateTag(CreateTagViewModel model)
         {
             if (ModelState.IsValid)
@@ -41,9 +43,9 @@ namespace Blog.Controllers
             return StatusCode(400);
         }
 
-        [Authorize(Roles = "Администратор, Модератор")]
+        [Authorize(Roles = "Администратор")]
         [HttpPut]
-        [Route("Tag/Edit")]
+        [Route("Edit")]
         public async Task<IActionResult> Edit(EditTagViewModel model)
         {
             if (ModelState.IsValid)
@@ -66,8 +68,8 @@ namespace Blog.Controllers
         }
 
         [HttpDelete]
-        [Authorize(Roles = "Администратор, Модератор")]
-        [Route("Tag/RemoveTag/{id}")]
+        [Authorize(Roles = "Администратор")]
+        [Route("RemoveTag/{id}")]
         public async Task<IActionResult> RemoveTag([FromRoute] string id)
         {
             await _tagService.RemoveTag(id);
@@ -75,7 +77,7 @@ namespace Blog.Controllers
         }
 
         [HttpGet]
-        [Route("Tag/AllTags")]
+        [Route("AllTags")]
         public async Task<List<Tag>> GetTags()
         {
             var tag = await _tagService.GetAllTags();
@@ -83,9 +85,8 @@ namespace Blog.Controllers
             return await Task.FromResult(tag);
         }
 
-        [Authorize(Roles = "Администратор, Модератор")]
         [HttpGet]
-        [Route("Tag/GetTag/{id}")]
+        [Route("GetTag/{id}")]
         public async Task<Tag> GetTag([FromRoute] string id)
         {
             var tag = _tagService.GetTag(id);

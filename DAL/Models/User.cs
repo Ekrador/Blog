@@ -20,9 +20,9 @@ namespace DAL.Models
 
         public string About { get; set; }
         public DateTime RegistrationDate { get; set; }
-        public List<Post> Posts { get; set; } 
-        public List<Comment> Comments { get; set; } 
-        public Role Role { get; set; }
+        public List<Post> Posts { get; set; } = new();
+        public List<Comment> Comments { get; set; } = new();
+        public Role Role { get; set; } 
         
 
         public string GetFullName()

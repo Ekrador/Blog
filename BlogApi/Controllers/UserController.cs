@@ -3,23 +3,21 @@ using BLL.Extensions;
 using BLL.Models.Users;
 using BLL.Services.IServices;
 using DAL.Models;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Blog.Controllers
+namespace BlogApi.Controllers
 {
-    public class UserController : Controller
+    [ApiController]
+    [Route("controller")]
+    internal class UserController : ControllerBase
     {
         private readonly IMapper _mapper;
         private readonly IUserService _userService;
@@ -32,12 +30,12 @@ namespace Blog.Controllers
             _userManager = userManager;
             _signInManager = signInManager;
             _mapper = mapper;
+            _userService.GenerateData();
         }
-
-
-        [Route("User/Authenticate")]
+        [Route("User/Login")]
         [HttpPost]
-        public async Task<IActionResult> Authenticate(UserLoginViewModel model)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Login(UserLoginViewModel model)
         {
             if (ModelState.IsValid)
             {
@@ -45,21 +43,19 @@ namespace Blog.Controllers
 
                 if (result.Succeeded)
                 {
-                    //return StatusCode(200);
-                    return RedirectToAction("Index", "Home");
+                    return StatusCode(200);
                 }
+
                 else
                 {
                     ModelState.AddModelError("", "Неправильный логин и (или) пароль");
-                    return RedirectToAction("Index", "Home");
                 }
             }
-            ModelState.AddModelError("", "Некорректные данные");
-            return RedirectToAction("Index", "Home");
+            return StatusCode(400);
         }
 
         [HttpPost]
-        [Route("User/Register")]
+        [Route("Register")]
         public async Task<IActionResult> RegisterAccount(UserRegisterViewModel model)
         {
             if (ModelState.IsValid)
@@ -86,7 +82,7 @@ namespace Blog.Controllers
         }
 
         [Authorize]
-        [Route("User/Edit")]
+        [Route("Edit")]
         [HttpPut]
         public async Task<IActionResult> Edit(UserEditViewModel model)
         {
@@ -111,27 +107,29 @@ namespace Blog.Controllers
 
         [Authorize(Roles = "Администратор")]
         [HttpDelete]
-        [Route("User/RemoveAccount/{id}")]
+        [Route("RemoveAccount/{id}")]
         public async Task<IActionResult> RemoveAccount([FromRoute] string id)
         {
             await _userService.RemoveAccount(id);
             return StatusCode(200);
         }
-        [Authorize(Roles = "Администратор")]
+
         [HttpGet]
-        [Route("User/AllAccounts")]
-        public async Task<IActionResult> GetAccounts()
+        [Route("AllAccounts")]
+        public async Task<List<User>> GetAccounts()
         {
             var users = await _userService.GetAccounts();
-            return View(users);
+
+            return await Task.FromResult(users);
         }
-        
+
         [HttpGet]
-        [Route("User/GetAccountById/{id}")]
-        public async Task<User> GetAccount([FromRoute] string id)
+        [Route("GetAccountById/{id}")]
+        public Task<User> GetAccount([FromRoute] string id)
         {
-            var user = await _userService.GetAccount(id);
-            return user;
+            var users = _userService.GetAccount(id);
+
+            return Task.FromResult(users.Result);
         }
     }
 }
