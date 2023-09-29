@@ -37,6 +37,7 @@ namespace Blog.Controllers
 
         [Route("User/Authenticate")]
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Authenticate(UserLoginViewModel model)
         {
             if (ModelState.IsValid)
@@ -55,6 +56,15 @@ namespace Blog.Controllers
                 }
             }
             ModelState.AddModelError("", "Некорректные данные");
+            return RedirectToAction("Index", "Home");
+        }
+
+        [HttpPost]
+        [Authorize]
+        [Route("User/Logout")]
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
             return RedirectToAction("Index", "Home");
         }
 
