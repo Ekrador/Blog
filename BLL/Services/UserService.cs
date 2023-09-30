@@ -101,10 +101,6 @@ namespace BLL.Services
             await _roleManager.CreateAsync(moderRole);
             await _roleManager.CreateAsync(adminRole);
 
-            user1.Role = userRole;
-            user2.Role = moderRole;
-            user3.Role = adminRole;
-
             await _userManager.CreateAsync(user1, testUser1.PasswordReg);
             await _userManager.CreateAsync(user2, testUser2.PasswordReg);
             await _userManager.CreateAsync(user3, testUser3.PasswordReg);

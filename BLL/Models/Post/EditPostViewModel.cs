@@ -11,7 +11,7 @@ namespace BLL.Models.Post
     public class EditPostViewModel
     {
         public string Id { get; set; }
-        public List<Tag>? Tags { get; set; }
+        public List<Tag>? Tags { get; set; } = new List<Tag>();
 
         [Required(ErrorMessage = "Введите заголовок статьи!")]
         [DataType(DataType.Text)]

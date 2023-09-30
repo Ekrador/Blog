@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using BLL.Extensions;
 using BLL.Models.Post;
 using BLL.Services.IServices;
 using DAL.Models;
@@ -30,6 +31,7 @@ namespace BLL.Services
         public async Task<bool> EditPost(EditPostViewModel model)
         {
             var post = _mapper.Map<Post>(model);
+            post.Convert(model);
             return await _postRep.Update(post);
         }
 

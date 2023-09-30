@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using BLL.Extensions;
 using BLL.Models.Comments;
 using BLL.Services.IServices;
 using DAL.Models;
@@ -24,6 +25,7 @@ namespace BLL.Services
         public async Task<bool> EditComment(EditCommentViewModel model)
         {
             var comment = _mapper.Map<Comment>(model);
+            comment.Convert(model);
             return await _commentRep.Update(comment);
         }
 
