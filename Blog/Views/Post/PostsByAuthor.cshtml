@@ -1,0 +1,9 @@
+﻿@using DAL.Models;
+@model BLL.Models.Posts.PostsByAuthorViewModel
+
+@{
+    ViewData["Title"] = "Список статей пользователя " + Model.AuthorName;
+}
+<h3 class="text-center">Все статьи автора @Model.AuthorName</h3>
+<partial name="_partialAllPosts" model="@Model" />
+

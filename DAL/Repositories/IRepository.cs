@@ -13,5 +13,6 @@ namespace DAL.Repositories
         Task<bool> Create(T item);
         Task<bool> Update(T item);
         Task<bool> Delete(T item);
+        Task LoadAllNavigationPropertiesAsync(T item);
     }
 }

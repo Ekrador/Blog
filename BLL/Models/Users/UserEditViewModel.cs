@@ -1,4 +1,6 @@
-﻿using DAL.Models;
+﻿using BLL.Models.Roles;
+using BLL.Models.Tags;
+using DAL.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -11,6 +13,7 @@ namespace BLL.Models.Users
     public class UserEditViewModel
     {
         public string Id { get; set; }
+        public List<RoleViewModel>? Roles { get; set; }
 
         [DataType(DataType.Text)]
         [Display(Name = "Имя", Prompt = "Введите имя")]
@@ -32,7 +35,7 @@ namespace BLL.Models.Users
 
         [DataType(DataType.Text)]
         [Display(Name = "Отчество", Prompt = "Введите отчество")]
-        public string MiddleName { get; set; }
+        public string? MiddleName { get; set; }
 
         [DataType(DataType.ImageUrl)]
         [Display(Name = "Аватар", Prompt = "Укажите ссылку на картинку")]
@@ -41,8 +44,15 @@ namespace BLL.Models.Users
         [DataType(DataType.Text)]
         [Display(Name = "О себе", Prompt = "Введите данные о себе")]
         public string About { get; set; }
-        public DateTime RegistrationDate { get; }
-        public List<DAL.Models.Post> Posts { get; }
-        public List<Comment> Comments { get; }
+
+        [DataType(DataType.Password)]
+        [Display(Name = "Пароль", Prompt = "Введите старый пароль")]
+        [StringLength(15, ErrorMessage = "Поле {0} должно иметь минимум {2} и максимум {1} символов.", MinimumLength = 5)]
+        public string? OldPassword { get; set; }
+
+        [DataType(DataType.Password)]
+        [Display(Name = "Пароль", Prompt = "Введите новый пароль")]
+        [StringLength(15, ErrorMessage = "Поле {0} должно иметь минимум {2} и максимум {1} символов.", MinimumLength = 5)]
+        public string? NewPassword { get; set; }
     }
 }

@@ -1,0 +1,35 @@
+﻿@using DAL.Models;
+@model BLL.Models.Tags.AllTagsViewModel
+@{
+    ViewData["Title"] = "Список тегов";
+}
+
+<h3 class="text-center">Все теги</h3>
+@if (User.IsInRole("Модератор") || User.IsInRole("Администратор"))
+{
+    <a asp-controller="Tag" asp-action="CreateTag" style="text-decoration:none;width:stretch;text-align:center;display:block"><b>Добавить тег</b></a>
+}
+@if (Model.Tags.Count != 0)
+{
+    @foreach (var tag in @Model.Tags)
+    {
+        <div class="card border-primary mb-3" style="width: 12rem">
+            <a asp-action="PostsByTag" asp-controller="Post" asp-route-id="@tag.Id" method="get" style="text-decoration:none">
+                <div class="card-body">
+                    <div class="card-title">
+                        <span class="badge badge-success">@tag.Name</span>
+                    </div>
+                    <div class="card-subtitle mb-2 text-muted" style="text-align: end; padding:0,6rem,0,0 ">
+                        <small>Статей по тегу: @tag.Posts.Count()</small>
+                    </div>
+                </div>
+            </a>
+        </div>
+    }
+}
+else
+{
+    <div>
+        <label> Поиск не дал результатов.</label>
+    </div>
+}

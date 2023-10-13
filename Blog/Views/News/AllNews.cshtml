@@ -1,0 +1,42 @@
+﻿@using DAL.Models;
+@model BLL.Models.News.AllNewsViewModel
+
+@{
+    ViewData["Title"] = "Блог";
+}
+<h4 class="text-center">Новости нашего блога</h4>
+@foreach (var news in Model.News)
+{
+    <div class="card border-primary mb-3" style="width: stretch">
+        <div class="card-body" style="padding:4%; padding:0">
+            <div class="card-title" style="padding-left:4%">
+                <h4><em>@news.Title</em></h4>
+            </div>
+            <p class="card-subtitle mb-1" style="padding:2%; text-indent: 1em;">
+                "@news.Content"
+            </p>
+            <div class="card-subtitle mb-2 text-muted" style="text-align: end; padding:5px">
+                <small class="card-subtitle mb-2 text-muted">@news.CreationDate</small>
+            </div>
+            @if (User.IsInRole("Модератор") || User.IsInRole("Администратор"))
+            {
+                <ul class="flexbox" style="float:right; padding-right:1%">
+                    <li style="display:inline-block">
+                        <a asp-area="" asp-controller="News" asp-action="EditNews" asp-route-id="@news.Id" method="get" style="max-width:max-content">
+                            <button type="submit" class="btn btn-warning" style="font-size:10px">
+                                <b>Редактировать</b>
+                            </button>
+                        </a>
+                    </li>
+                    <li style="max-width:max-content;display:inline-block">
+                        <form asp-area="" asp-controller="News" asp-action="RemoveNews" asp-route-id="@news.Id" method="post" style="max-width:max-content">
+                            <button type="submit" class="btn btn-danger" style="font-size:10px">
+                                <b>Удалить</b>
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            }
+        </div>
+    </div>
+}

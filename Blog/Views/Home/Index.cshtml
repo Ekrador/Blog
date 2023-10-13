@@ -8,45 +8,4 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1>
-        Current User is @User.Identity.Name<br />
-        user has a role claim - @User.HasClaim(c => c.Type == ClaimTypes.Role)<br />
-        His Claims:
-    </h1>
-    @foreach (var claim in User.Claims)
-    {
-        <b>@claim.Type - @claim.Value</b>
-
-        <br />
-    }
-    <form class="frm" method="post" asp-controller="User" asp-action="Authenticate">
-        <div asp-validation-summary="ModelOnly"></div>
-        <div>
-            <div class="mrgn">
-                <input asp-for="Email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
-            </div>
-        </div>
-        <div>
-            <div class="mrgn">
-                <input asp-for="Password" class="form-control" />
-                <span asp-validation-for="Password" class="text-danger"></span>
-            </div>
-        </div>
-        <div class="center">
-            <input class="btn_submit" type="submit" value="Login" />
-        </div>
-    </form>
-    @if (SignInManager.IsSignedIn(User))
-    {
-        <div class="center">
-            <form method="post" asp-controller="User" asp-action="Logout">
-                <button type="submit" class="btn_submit"> Logout</button>
-            </form>
-        </div>
-    }
-    <h2>
-        <a asp-action="GetAccounts" asp-controller="User" method="get" style="text-decoration:none">Accounts</a>
-    </h2>
-</div>
+<h4>Добро пожаловать на наш блог!</h4>

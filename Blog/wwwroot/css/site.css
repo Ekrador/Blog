@@ -16,3 +16,18 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+.checkbox-input:checked + .checkbox-text {
+    text-decoration: underline;
+}
+
+.ava {
+    width: 6rem;
+    height: 6rem;
+    max-height: 6rem;
+    max-width: 6rem;
+    object-fit: fill;
+}
+.okbtn{
+    margin:1%;
+}

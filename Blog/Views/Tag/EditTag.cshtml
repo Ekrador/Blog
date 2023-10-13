@@ -1,0 +1,25 @@
+﻿@model BLL.Models.Tags.EditTagViewModel
+
+@{
+    ViewData["Title"] = "Редактирование тега";
+}
+
+<div class="block-reg background-white">
+    <h3 class="center">Редактировать тег</h3>
+    <form class="frm" method="get" asp-controller="Tag" asp-action="EditTag">
+        <div asp-validation-summary="ModelOnly"></div>
+        <input type="hidden" asp-for="Id" value="@Model.Id" />
+        <div>
+            <div class="mrgn">
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="center">
+            <input class="okbtn btn btn-success" type="submit" value="Изменить" />
+        </div>
+        <div class="center">
+            <a asp-controller="Tag" asp-action="GetTags">Список всех тегов</a>
+        </div>
+    </form>
+</div>

@@ -1,4 +1,6 @@
-﻿using BLL.Models.Post;
+﻿using AutoMapper;
+using BLL.Models.Posts;
+using BLL.Models.Tags;
 using DAL.Models;
 using System;
 using System.Collections.Generic;
@@ -12,7 +14,6 @@ namespace BLL.Extensions
     {
         public static Post Convert(this Post post, EditPostViewModel posteditvm)
         {
-            post.Tags = posteditvm.Tags;
             post.Content = posteditvm.Content ?? post.Content;
             post.Title = posteditvm.Title ?? post.Title;
             return post;

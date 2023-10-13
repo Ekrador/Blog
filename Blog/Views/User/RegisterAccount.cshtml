@@ -1,0 +1,53 @@
+﻿@model BLL.Models.Users.UserRegisterViewModel
+
+@{
+    ViewData["Title"] = "Регистрация нового пользователя";
+}
+
+<div class="block-reg background-white">
+    <h3 class="center">Регистрация нового пользователя</h3>
+    <form class="frm" method="post" asp-controller="User" asp-action="RegisterAccount">
+        <div asp-validation-summary="ModelOnly"></div>
+        <div>
+            <div class="mrgn">
+                <input asp-for="FirstName" class="form-control" />
+                <span asp-validation-for="FirstName" class="text-danger"></span>
+            </div>
+        </div>
+        <div>
+            <div class="mrgn">
+                <input asp-for="LastName" class="form-control" />
+                <span asp-validation-for="LastName" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="mrgn">
+            <input asp-for="BirthDate" class="form-control date_control" id="birthdate" />
+            <span asp-validation-for="BirthDate" class="text-danger"></span>
+
+        </div>
+        <div>
+            <div class="mrgn">
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+        </div>
+        <div>
+            <div class="mrgn">
+                <input asp-for="PasswordReg" class="form-control" />
+                <span asp-validation-for="PasswordReg" class="text-danger"></span>
+            </div>
+        </div>
+        <div>
+            <div class="mrgn">
+                <input asp-for="PasswordConfirm" class="form-control" />
+                <span asp-validation-for="PasswordConfirm" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="center">
+            <input class="okbtn btn btn-success" type="submit" value="Регистрация" />
+        </div>
+    </form>
+</div>
+
+<script src="../js/BirthdateValidation.js"></script>

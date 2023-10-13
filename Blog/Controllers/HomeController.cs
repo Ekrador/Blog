@@ -22,7 +22,7 @@ namespace Blog.Controllers
         public async Task<IActionResult> Index()
         {
             await _userService.GenerateData();
-            return View();
+            return RedirectToAction("AllNews", "News");
         }
 
         public IActionResult Privacy()
@@ -30,10 +30,23 @@ namespace Blog.Controllers
             return View();
         }
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
+        [Route("Home/Error/{statusCode}")]
+        public IActionResult Error(int? statusCode = null)
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+
+            switch (statusCode)
+            {
+                case 404:
+                    break;
+                case 403:
+                    break;
+                default:
+                    statusCode = 500;
+                    break;
+            }
+            this.HttpContext.Response.StatusCode = (int)statusCode;
+
+            return View("Error", new ErrorViewModel { StatusCode = statusCode});
         }
     }
 }

@@ -1,5 +1,5 @@
 ﻿using BLL.Models.Comments;
-using BLL.Models.Post;
+using BLL.Models.Posts;
 using BLL.Models.Users;
 using DAL.Models;
 using System;

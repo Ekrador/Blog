@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,12 +23,12 @@ namespace DAL.Models
         public DateTime RegistrationDate { get; set; }
         public List<Post> Posts { get; set; } = new();
         public List<Comment> Comments { get; set; } = new();
-        public Role Role { get; set; } 
+        public List<Role> Roles { get; set; } 
         
 
         public string GetFullName()
         {
-            return FirstName + " " + MiddleName + " " + LastName;
+            return LastName + " " + FirstName + " " + MiddleName ;
         }
 
         public User()
@@ -35,7 +36,7 @@ namespace DAL.Models
             RegistrationDate = DateTime.Now;
             Posts = new List<Post>();
             Comments = new List<Comment>();
-            Avatar = "images/avatar.png";
+            Avatar = "../images/avatar.png";
             About = "Информация обо мне.";
         }
     }

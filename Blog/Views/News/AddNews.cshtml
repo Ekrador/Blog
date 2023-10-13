@@ -1,0 +1,27 @@
+﻿@model BLL.Models.News.AddNewsViewModel
+
+@{
+    ViewData["Title"] = "Добавить новость";
+}
+
+<div class="block-reg background-white">
+    <h3 class="center">Добавить новость</h3>
+    <form class="frm" method="post" asp-controller="News" asp-action="AddNews">
+        <div asp-validation-summary="ModelOnly"></div>
+        <div>
+            <div class="mrgn">
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+        </div>
+        <div>
+            <div class="mrgn">
+                <input asp-for="Content" class="form-control" />
+                <span asp-validation-for="Content" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="center">
+            <input class="okbtn btn btn-success" type="submit" value="Добавить" />
+        </div>
+    </form>
+</div>

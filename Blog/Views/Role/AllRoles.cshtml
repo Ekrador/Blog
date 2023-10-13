@@ -1,0 +1,64 @@
+﻿@using BLL.Models.Roles;
+@using DAL.Models;
+@using Microsoft.AspNetCore.Identity;
+@model BLL.Models.Roles.AllRolesViewModel
+@inject UserManager<User> UserManager;
+
+@{
+    ViewData["Title"] = "Список ролей";
+}
+
+<h3 class="text-center">Все роли</h3>
+@if (User.IsInRole("Модератор") || User.IsInRole("Администратор"))
+{
+    <a asp-controller="Role" asp-action="CreateRole" style="text-decoration:none;width:stretch;text-align:center;display:block"><b>Добавить роль</b></a>
+}
+@if (Model.Roles.Count != 0)
+{
+
+    @foreach (var role in @Model.Roles)
+    {
+        <div class="card border-primary mb-3" style="width: 16rem">
+            <a asp-action="ViewRole" asp-route-id="@role.Id" method="get" style="text-decoration:none">
+                <div class="card-body" style="padding:10px">
+                    <div class="card-title" style="text-align:start">
+                        <span class="badge badge-success">@role.Name</span>
+                    </div>
+                    <div class="card-subtitle mb-1" style="text-align:start">
+                        @role.Description
+                    </div>
+                    <div class="card-subtitle mb-2 text-muted" style="text-align: end; padding:5px">
+                        <small class="card-subtitle mb-2 text-muted">Пользователей в роли: @UserManager.GetUsersInRoleAsync(role.Name).Result.Count()</small>
+                    </div>
+                        @if (User.IsInRole("Модератор")
+                       || User.IsInRole("Администратор")
+                       && !StandartRoles.Roles.Contains(role.Name))
+                        {
+                            <ul class="flexbox" style="float:right; padding-right:1%">
+                                <li style="display:inline-block">
+                                    <a asp-area="" asp-controller="Role" asp-action="EditRole" asp-route-id="@role.Id" method="get" style="max-width:max-content">
+                                        <button type="submit" class="btn btn-warning" style="font-size:10px">
+                                            <b>Редактировать</b>
+                                        </button>
+                                    </a>
+                                </li>
+                                <li style="max-width:max-content;display:inline-block">
+                                    <form asp-area="" asp-controller="Role" asp-action="RemoveRole" asp-route-id="@role.Id" method="post" style="max-width:max-content">
+                                        <button type="submit" class="btn btn-danger" style="font-size:10px">
+                                            <b>Удалить</b>
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        }
+                </div>
+            </a>
+        </div>
+    }
+}
+else
+{
+    <div>
+        <label> Поиск не дал результатов.</label>
+    </div>
+}

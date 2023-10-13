@@ -1,10 +1,13 @@
 ﻿using BLL.Models.Comments;
-using BLL.Models.Post;
+using BLL.Models.Posts;
+using BLL.Models.Tags;
+using BLL.Services;
 using BLL.Services.IServices;
 using DAL.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,72 +33,84 @@ namespace Blog.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = User;
-                var result = await _userManager.GetUserAsync(user);
-                model.AuthorId = result.Id;
                 var comment = await _commentService.WriteComment(model);
                 if (comment)
                 {
-                    return StatusCode(200);
+                    return RedirectToAction("ViewPost", "Post", new { Id = model.PostId });
                 }
                 else
                 {
-                    return StatusCode(500);
+                    ModelState.AddModelError("", "Некорректные данные");
                 }
             }
-            ModelState.AddModelError("", "Некорректные данные");
-            return StatusCode(400);
+            return View("_partialAddComment", model);
         }
 
-        [Authorize]
-        [HttpPut]
-        [Route("Comment/Edit")]
-        public async Task<IActionResult> Edit(EditCommentViewModel model)
+        [AuthorizationEditComment]
+        [HttpGet]
+        [Route("Comment/Edit/{id}")]
+        public async Task<IActionResult> EditComment(string id)
+        {
+            var model = await _commentService.EditComment(id);
+            if (model == null)
+                return StatusCode(404);
+            return View(model);
+        }
+
+        [AuthorizationEditComment]
+        [HttpPost]
+        [Route("Comment/Edit/{id}")]
+        public async Task<IActionResult> EditComment(EditCommentViewModel model)
         {
             if (ModelState.IsValid)
             {
                 var result = await _commentService.EditComment(model);
                 if (result)
                 {
-                    return StatusCode(200);
+                    return RedirectToAction("AllComments", "Comment");
                 }
                 else
                 {
-                    return StatusCode(501);
+                    ModelState.AddModelError("", "Некорректные данные");
                 }
             }
-            else
-            {
-                ModelState.AddModelError("", "Некорректные данные");
-                return StatusCode(400);
-            }
+            return View("EditComment", model);
         }
 
-        [HttpDelete]
-        [Authorize(Roles = "Администратор, Модератор")]
+        [HttpPost]
+        [AuthorizationEditComment]
         [Route("Comment/RemoveComment/{id}")]
-        public async Task<IActionResult> RemoveComment([FromRoute] string id)
+        public async Task<IActionResult> RemoveComment(string id)
         {
             await _commentService.RemoveComment(id);
-            return StatusCode(200);
+            var comments = await _commentService.GetAllComments();
+            return View("AllComments", new AllCommentsViewModel { Comments = comments });
         }
 
         [HttpGet]
         [Route("Comment/AllComments")]
-        public async Task<List<Comment>> GetPosts()
+        public async Task<IActionResult> AllComments()
         {
-            var comment = await _commentService.GetAllComments();
-
-            return await Task.FromResult(comment);
+            var comments = await _commentService.GetAllComments();
+            return View(new AllCommentsViewModel { Comments = comments });
         }
 
         [HttpGet]
-        [Route("Comment/GetComment/{id}")]
-        public async Task<Comment> GetComment([FromRoute] string id)
+        [Route("Comment/CommentsByAuthor")]
+        public async Task<IActionResult> CommentsByAuthor(string id)
         {
-            var comment = _commentService.GetComment(id);
+            var comments = await _commentService.GetCommentsByAuthor(id);
 
-            return await Task.FromResult(comment.Result);
+            return View(comments);
+        }
+
+        [HttpGet]
+        [Route("Comment/ViewComment")]
+        public async Task<IActionResult> ViewComment(string id)
+        {
+            var comment = await _commentService.ViewComment(id);
+
+            return View(comment);
         }
     }
 }

@@ -1,0 +1,28 @@
+﻿@model BLL.Models.Roles.EditRoleViewModel
+
+@{
+    ViewData["Title"] = "Редактирование роли";
+}
+
+<div class="block-reg background-white">
+    <h3 class="center">Редактирование роли</h3>
+    <form class="frm" method="post" asp-controller="Role" asp-action="EditRole">
+        <div asp-validation-summary="ModelOnly"></div>
+        <input type="hidden" asp-for="Id" value="@Model.Id" />
+        <div>
+            <div class="mrgn">
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="mrgn">
+                <textarea asp-for="Description" class="form-control"></textarea>
+            </div>
+        </div>
+        <div class="center">
+            <input class="okbtn btn btn-success" type="submit" value="Изменить" />
+        </div>
+        <div class="center">
+            <a asp-controller="Role" asp-action="AllRoles">Список всех ролей</a>
+        </div>
+    </form>
+</div>

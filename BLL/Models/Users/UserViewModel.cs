@@ -15,6 +15,5 @@ namespace BLL.Models.Users
         {
             User = user;
         }
-
     }
 }

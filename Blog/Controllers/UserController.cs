@@ -34,6 +34,13 @@ namespace Blog.Controllers
             _mapper = mapper;
         }
 
+        [HttpGet]
+        [Route("User/Login")]
+        public IActionResult Login(string returnUrl = null)
+        {
+
+            return View(new UserLoginViewModel { ReturnUrl = returnUrl });
+        }
 
         [Route("User/Authenticate")]
         [HttpPost]
@@ -46,17 +53,23 @@ namespace Blog.Controllers
 
                 if (result.Succeeded)
                 {
-                    //return StatusCode(200);
-                    return RedirectToAction("Index", "Home");
+                    if (!string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
+                    {
+                        return Redirect(model.ReturnUrl);
+                    }
+                    else
+                    {
+                        return RedirectToAction("Index", "Home");
+                    }
                 }
                 else
                 {
                     ModelState.AddModelError("", "Неправильный логин и (или) пароль");
-                    return RedirectToAction("Index", "Home");
+                    return View("Login", model);
                 }
             }
             ModelState.AddModelError("", "Некорректные данные");
-            return RedirectToAction("Index", "Home");
+            return View("Login", model);
         }
 
         [HttpPost]
@@ -64,8 +77,15 @@ namespace Blog.Controllers
         [Route("User/Logout")]
         public async Task<IActionResult> Logout()
         {
-            await _signInManager.SignOutAsync();
+            await _userService.Logout();
             return RedirectToAction("Index", "Home");
+        }
+
+        [HttpGet]
+        [Route("User/Register")]
+        public IActionResult RegisterAccount()
+        {
+            return View(new UserRegisterViewModel());
         }
 
         [HttpPost]
@@ -77,7 +97,7 @@ namespace Blog.Controllers
                 var result = await _userService.Register(model);
                 if (result.Succeeded)
                 {
-                    return StatusCode(200);
+                    return RedirectToAction("Index", "Home");
                 }
                 else
                 {
@@ -87,17 +107,24 @@ namespace Blog.Controllers
                     }
                 }
             }
-            else
-            {
-                ModelState.AddModelError("", "Некорректные данные");
-                return StatusCode(400);
-            }
-            return StatusCode(400);
+            return View("RegisterAccount", model);
         }
 
-        [Authorize]
-        [Route("User/Edit")]
-        [HttpPut]
+        [AuthorizationEditUser]
+        [Route("User/Edit/{id}")]
+        [HttpGet]
+        public async Task<IActionResult> Edit(string id)
+        {
+            var model = await _userService.EditAccount(id);
+            if (model == null)
+                return StatusCode(404);
+            return View(model);
+        }
+
+
+        [AuthorizationEditUser]
+        [Route("User/Edit/{id}")]
+        [HttpPost]
         public async Task<IActionResult> Edit(UserEditViewModel model)
         {
             if (ModelState.IsValid)
@@ -105,43 +132,42 @@ namespace Blog.Controllers
                 var result = await _userService.EditAccount(model);
                 if (result.Succeeded)
                 {
-                    return StatusCode(200);
+                    return RedirectToAction("UserPage", "User", new { Id = model.Id });
                 }
                 else
                 {
-                    return StatusCode(501);
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
                 }
             }
-            else
-            {
-                ModelState.AddModelError("", "Некорректные данные");
-                return StatusCode(400);
-            }
+            return View("Edit", model);
         }
 
         [Authorize(Roles = "Администратор")]
-        [HttpDelete]
-        [Route("User/RemoveAccount/{id}")]
-        public async Task<IActionResult> RemoveAccount([FromRoute] string id)
+        [HttpPost]
+        [Route("User/RemoveAccount")]
+        public async Task<IActionResult> RemoveAccount(string id)
         {
             await _userService.RemoveAccount(id);
-            return StatusCode(200);
+            return RedirectToAction("Index", "Home");
         }
-        [Authorize(Roles = "Администратор")]
         [HttpGet]
         [Route("User/AllAccounts")]
-        public async Task<IActionResult> GetAccounts()
+        public async Task<IActionResult> AllUsers()
         {
             var users = await _userService.GetAccounts();
-            return View(users);
+            var model = new AllUsersViewModel { Users = users };
+            return View(model);
         }
-        
+
         [HttpGet]
-        [Route("User/GetAccountById/{id}")]
-        public async Task<User> GetAccount([FromRoute] string id)
+        [Route("User/View")]
+        public async Task<IActionResult> UserPage(string id)
         {
-            var user = await _userService.GetAccount(id);
-            return user;
+            var user = await _userService.UserPage(id);
+            return View(user);
         }
     }
 }

@@ -1,0 +1,41 @@
+﻿@using DAL.Models;
+@using Microsoft.AspNetCore.Identity;
+@using BLL.Models.Users;
+@using System.Security.Claims;
+@inject SignInManager<User> SignInManager
+@inject UserManager<User> UserManager
+
+<div style="float: left;
+     color: black;
+     text-align: center;
+     padding: 6px 16px;
+     font-size: 17px;">
+    <div class="row" >
+        @if (SignInManager.IsSignedIn(User))
+        {
+            <div class="col-md-6" style="max-width:fit-content">
+                <a method="get" asp-controller="User" asp-action="UserPage" asp-route-id="@UserManager.GetUserId(User)">
+                    <button type="submit" class="nav-link btn btn-link text-dark">Профиль</button>
+                </a>
+            </div>
+            <div class="col-md-6" style="max-width:fit-content">
+                <form method="post" asp-controller="User" asp-action="Logout">
+                    <button type="submit" class="nav-link btn btn-link text-dark">Выход</button>
+                </form>
+            </div>
+        }
+        else
+        {
+            <div class="col-md-6" style="max-width:fit-content">
+                <form method="get" asp-controller="User" asp-action="Login">
+                    <button type="submit" class="nav-link btn btn-link text-dark">Войти</button>
+                </form>
+            </div>
+            <div class="col-md-6" style="max-width:fit-content">
+                <form method="get" asp-controller="User" asp-action="RegisterAccount">
+                    <button type="submit" class="nav-link btn btn-link text-dark">Зарегистрироваться</button>
+                </form>
+            </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,57 @@
+﻿@using DAL.Models;
+@using Microsoft.AspNetCore.Identity;
+@using System.Security.Claims;
+@model BLL.Models.Users.UserViewModel
+@inject UserManager<User> UserManager
+
+@{
+    ViewData["Title"] = "Пользователь " + @Model.User.GetFullName();
+}
+
+<h4 class="center">@Model.User.GetFullName()</h4>
+@foreach (var role in await UserManager.GetRolesAsync(@Model.User))
+{
+    <span class="badge badge-info">&nbsp @role</span>
+}
+<br />
+<img class="float-left rounded-circle ava" src="@Model.User.Avatar" />
+
+@if (User.IsInRole("Модератор") || User.IsInRole("Администратор") || User.Claims.Any(c => c.Type == ClaimTypes.NameIdentifier && c.Value.Contains(Model.User.Id)))
+{
+    <ul class="flexbox" style="max-width:max-content; padding:0">
+        <li style="max-width:max-content;display:inline-block">
+            <a method="get" asp-controller="User" asp-action="Edit" asp-route-id="@Model.User.Id">
+                <input class="btn btn-warning" type="submit" value="Редактировать" style="max-width:max-content;height: 28px;font-size:10px" />
+            </a>
+        </li>
+        <li style="max-width:max-content;display:inline-block">
+            <form method="post" asp-controller="User" asp-action="RemoveAccount" asp-route-id="@Model.User.Id">
+                <input class="btn btn-danger" type="submit" value="Удалить" style="max-width:max-content;height: 28px;font-size:10px" />
+            </form>
+        </li>
+    </ul>
+}
+<div>
+    <div>
+        <label class="gray-text">Email:</label>
+        <label> @Model.User.Email</label>
+    </div>
+    <div>
+        <label class="gray-text">Дата рождения:</label>
+        <label> @Model.User.BirthDate.ToLongDateString()</label>
+    </div>
+    <div>
+        <label class="gray-text">О себе:</label>
+        <label> @Model.User.About</label>
+    </div>
+    <div>
+        <a asp-controller="Post" asp-action="PostsByAuthor" asp-route-id="@Model.User.Id" method="get" style="text-decoration:none">
+            <h5 class="gray-text">Статьи пользователя</h5>
+        </a>
+    </div>
+    <div>
+        <a asp-controller="Comment" asp-action="CommentsByAuthor" asp-route-id="@Model.User.Id" method="get" style="text-decoration:none">
+            <h5 class="gray-text">Комментарии пользователя</h5>
+        </a>
+    </div>
+</div>

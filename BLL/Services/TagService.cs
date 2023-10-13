@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using BLL.Extensions;
+using BLL.Models.Posts;
 using BLL.Models.Tags;
 using BLL.Services.IServices;
 using DAL.Models;
@@ -27,15 +29,32 @@ namespace BLL.Services
             return await _tagRep.Create(tag);
         }
 
+        public async Task<EditTagViewModel> EditTag(string id)
+        {
+            EditTagViewModel tagModel = null;
+            var tag = await _tagRep.Get(id);
+            if (tag != null)
+            {
+                tagModel = _mapper.Map<EditTagViewModel>(tag);
+            }
+            return tagModel;
+        }
+
         public async Task<bool> EditTag(EditTagViewModel model)
         {
-            var tag = _mapper.Map<Tag>(model);
+            var tag = await _tagRep.Get(model.Id);
+            tag.Convert(model);
             return await _tagRep.Update(tag);
         }
 
         public async Task<List<Tag>> GetAllTags()
         {
             var tags = await _tagRep.GetAll();
+            if (tags != null)
+            {
+                foreach(var tag in tags)
+                await _tagRep.LoadAllNavigationPropertiesAsync(tag);
+            }
             return tags.ToList();
         }
 
