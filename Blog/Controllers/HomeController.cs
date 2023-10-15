@@ -30,9 +30,16 @@ namespace Blog.Controllers
             return View();
         }
 
-        [Route("Home/Error/{statusCode}")]
-        public IActionResult Error(int? statusCode = null)
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error()
         {
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        [Route("Home/ErrorProd/{statusCode}")]
+        public IActionResult ErrorProd(int? statusCode = null)
+        {
+            _logger.LogError($"An error occurred. Redirect to {statusCode}");
 
             switch (statusCode)
             {
@@ -45,8 +52,7 @@ namespace Blog.Controllers
                     break;
             }
             this.HttpContext.Response.StatusCode = (int)statusCode;
-
-            return View("Error", new ErrorViewModel { StatusCode = statusCode});
+            return View("ErrorProd", new ErrorViewModel { StatusCode = statusCode});
         }
     }
 }

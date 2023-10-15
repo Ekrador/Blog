@@ -16,6 +16,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Blog.Controllers
 {
@@ -25,21 +26,22 @@ namespace Blog.Controllers
         private readonly IUserService _userService;
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
+        private readonly ILogger<UserController> _logger;
 
-        public UserController(UserManager<User> userManager, SignInManager<User> signInManager, IMapper mapper, IUserService userService)
+        public UserController(UserManager<User> userManager, SignInManager<User> signInManager, IMapper mapper, IUserService userService, ILogger<UserController> logger)
         {
             _userService = userService;
             _userManager = userManager;
             _signInManager = signInManager;
             _mapper = mapper;
+            _logger = logger;
         }
 
         [HttpGet]
         [Route("User/Login")]
-        public IActionResult Login(string returnUrl = null)
+        public IActionResult Login()
         {
-
-            return View(new UserLoginViewModel { ReturnUrl = returnUrl });
+            return View(new UserLoginViewModel());
         }
 
         [Route("User/Authenticate")]
@@ -53,14 +55,8 @@ namespace Blog.Controllers
 
                 if (result.Succeeded)
                 {
-                    if (!string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
-                    {
-                        return Redirect(model.ReturnUrl);
-                    }
-                    else
-                    {
-                        return RedirectToAction("Index", "Home");
-                    }
+                    _logger.LogInformation("пользователь успешно вошел в систему");
+                    return RedirectToAction("Index", "Home");
                 }
                 else
                 {
@@ -78,6 +74,7 @@ namespace Blog.Controllers
         public async Task<IActionResult> Logout()
         {
             await _userService.Logout();
+            _logger.LogInformation("пользователь вышел из системы");
             return RedirectToAction("Index", "Home");
         }
 
@@ -97,6 +94,7 @@ namespace Blog.Controllers
                 var result = await _userService.Register(model);
                 if (result.Succeeded)
                 {
+                    _logger.LogInformation("создан новый аккаунт");
                     return RedirectToAction("Index", "Home");
                 }
                 else
@@ -132,6 +130,7 @@ namespace Blog.Controllers
                 var result = await _userService.EditAccount(model);
                 if (result.Succeeded)
                 {
+                    _logger.LogInformation($"информация пользователя изменена: {model.Id}");
                     return RedirectToAction("UserPage", "User", new { Id = model.Id });
                 }
                 else
@@ -145,12 +144,13 @@ namespace Blog.Controllers
             return View("Edit", model);
         }
 
-        [Authorize(Roles = "Администратор")]
+        [AuthorizationEditUser]
         [HttpPost]
-        [Route("User/RemoveAccount")]
+        [Route("User/RemoveAccount/{id}")]
         public async Task<IActionResult> RemoveAccount(string id)
         {
             await _userService.RemoveAccount(id);
+            _logger.LogWarning($"аккаунт удален: {id}");
             return RedirectToAction("Index", "Home");
         }
         [HttpGet]

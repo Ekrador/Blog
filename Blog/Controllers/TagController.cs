@@ -16,9 +16,11 @@ namespace Blog.Controllers
     public class TagController : Controller
     {
         private readonly ITagService _tagService;
-        public TagController(ITagService tagService)
+        private readonly ILogger<TagController> _logger;
+        public TagController(ITagService tagService, ILogger<TagController> logger)
         {
             _tagService = tagService;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -38,7 +40,8 @@ namespace Blog.Controllers
                 var tag = await _tagService.CreateTag(model);
                 if (tag)
                 {
-                    return RedirectToAction("Index", "Home"); ;
+                    _logger.LogInformation("new tag created");
+                    return RedirectToAction("AllTags", "Tag");
                 }
                 else
                 {
@@ -69,7 +72,8 @@ namespace Blog.Controllers
                 var result = await _tagService.EditTag(model);
                 if (result)
                 {
-                    return RedirectToAction("EditTag", "Tag", model.Id);
+                    _logger.LogInformation($"tag edited: {model.Id}");
+                    return RedirectToAction("AllTags", "Tag");
                 }
                 else
                 {
@@ -80,13 +84,14 @@ namespace Blog.Controllers
             return View("Edit", model);
         }
 
-        [HttpDelete]
+        [HttpPost]
         [Authorize(Roles = "Администратор, Модератор")]
         [Route("Tag/RemoveTag")]
         public async Task<IActionResult> RemoveTag(string id)
         {
             await _tagService.RemoveTag(id);
-            return StatusCode(200);
+            _logger.LogWarning($"tag deleted: {id}");
+            return RedirectToAction("AllTags", "Tag");
         }
 
         [HttpGet]

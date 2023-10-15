@@ -27,10 +27,15 @@ namespace BLL.Services
             return news.ToList();
         }
 
-        public async Task<bool> AddNews(AddNewsViewModel model)
+        public async Task<string> AddNews(AddNewsViewModel model)
         {
             var news = new News { Content = model.Content, Title = model.Title };
-            return await _newsRep.Create(news);
+            var result = await _newsRep.Create(news);
+            if(result)
+            {
+                return news.Id;
+            }
+            return null;
         }
 
         public AddNewsViewModel AddNews()

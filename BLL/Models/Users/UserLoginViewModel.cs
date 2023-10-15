@@ -18,6 +18,5 @@ namespace BLL.Models.Users
         [DataType(DataType.Password)]
         [Display(Name = "Пароль", Prompt = "Введите пароль")]
         public string Password { get; set; }
-        public string? ReturnUrl { get; set; }
     }
 }

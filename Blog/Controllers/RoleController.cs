@@ -11,10 +11,12 @@ namespace Blog.Controllers
     {
         private readonly RoleManager<Role> _roleManager;
         private readonly IRoleService _roleService;
-        public RoleController(RoleManager<Role> roleManager, IRoleService roleService)
+        private readonly ILogger<RoleController> _logger;
+        public RoleController(RoleManager<Role> roleManager, IRoleService roleService, ILogger<RoleController> logger)
         {
             _roleManager = roleManager;
             _roleService = roleService;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -34,6 +36,7 @@ namespace Blog.Controllers
                 var result = await _roleService.CreateRole(model);
                 if (result.Succeeded)
                 {
+                    _logger.LogInformation("new role created");
                     return RedirectToAction("AllRoles", "Role");
                 }
                 else
@@ -68,6 +71,7 @@ namespace Blog.Controllers
                 var result = await _roleService.EditRole(model);
                 if (result.Succeeded)
                 {
+                    _logger.LogInformation($"edited role {model.Id}");
                     return RedirectToAction("AllRoles");
                 }
                 else
@@ -87,6 +91,7 @@ namespace Blog.Controllers
         public async Task<IActionResult> RemoveRole(string id)
         {
             await _roleService.RemoveRole(id);
+            _logger.LogWarning($"removed role {id}");
             return RedirectToAction("AllRoles", "Role");
         }
 

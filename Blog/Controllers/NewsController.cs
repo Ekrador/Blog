@@ -12,10 +12,12 @@ namespace Blog.Controllers
     {
         private readonly INewsService _newsService;
         private readonly UserManager<User> _userManager;
-        public NewsController(INewsService newsService, UserManager<User> userManager)
+        private readonly ILogger<NewsController> _logger;
+        public NewsController(INewsService newsService, UserManager<User> userManager, ILogger<NewsController> logger)
         {
             _newsService = newsService;
             _userManager = userManager;
+            _logger = logger;
         }
 
         [Authorize(Roles = "Администратор, Модератор")]
@@ -35,8 +37,9 @@ namespace Blog.Controllers
             if (ModelState.IsValid)
             {
                 var news = await _newsService.AddNews(model);
-                if (news)
+                if (news != null)
                 {
+                    _logger.LogInformation($"the user added new news {news}");
                     return RedirectToAction("Index", "Home");
                 }
                 else
@@ -68,6 +71,7 @@ namespace Blog.Controllers
                 var result = await _newsService.EditNews(model);
                 if (result)
                 {
+                    _logger.LogInformation($"the user edited news {model.Id}");
                     return RedirectToAction("Index", "Home");
                 }
                 else
@@ -84,6 +88,7 @@ namespace Blog.Controllers
         public async Task<IActionResult> RemoveNews(string id)
         {
             await _newsService.RemoveNews(id);
+            _logger.LogWarning($"the user deleted news {id}");
             return RedirectToAction("Index", "Home");
         }
 

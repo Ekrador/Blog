@@ -20,10 +20,12 @@ namespace Blog.Controllers
     {
         private readonly ICommentService _commentService;
         private readonly UserManager<User> _userManager;
-        public CommentController(ICommentService commentService, UserManager<User> userManager)
+        private readonly ILogger<CommentController> _logger;
+        public CommentController(ICommentService commentService, UserManager<User> userManager, ILogger<CommentController> logger)
         {
             _commentService = commentService;
-            _userManager = userManager; 
+            _userManager = userManager;
+            _logger = logger;
         }
 
         [Authorize]
@@ -36,6 +38,8 @@ namespace Blog.Controllers
                 var comment = await _commentService.WriteComment(model);
                 if (comment)
                 {
+                    _logger.LogInformation($"the user wrote a new comment on post {model.PostId}");
+
                     return RedirectToAction("ViewPost", "Post", new { Id = model.PostId });
                 }
                 else
@@ -67,6 +71,7 @@ namespace Blog.Controllers
                 var result = await _commentService.EditComment(model);
                 if (result)
                 {
+                    _logger.LogInformation($"the user edit comment {model.Id}");
                     return RedirectToAction("AllComments", "Comment");
                 }
                 else
@@ -83,6 +88,7 @@ namespace Blog.Controllers
         public async Task<IActionResult> RemoveComment(string id)
         {
             await _commentService.RemoveComment(id);
+            _logger.LogWarning($"the user delete comment {id}");
             var comments = await _commentService.GetAllComments();
             return View("AllComments", new AllCommentsViewModel { Comments = comments });
         }

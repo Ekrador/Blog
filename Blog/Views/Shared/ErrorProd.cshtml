@@ -1,0 +1,16 @@
+﻿@model ErrorViewModel
+@{
+    ViewData["Title"] = "Error";
+}
+
+
+@if (Model.StatusCode.HasValue)
+{
+    <img src="" id="error" style="width: 100%;
+    height: 100%;">
+}
+<script>
+    const pic = "/images/Error" + @Model.StatusCode + ".png";
+    const image = document.getElementById("error");
+    image.src = pic;
+</script>

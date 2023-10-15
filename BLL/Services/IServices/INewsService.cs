@@ -10,7 +10,7 @@ namespace BLL.Services.IServices
 {
     public interface INewsService
     {
-        Task<bool> AddNews(AddNewsViewModel model);
+        Task<string> AddNews(AddNewsViewModel model);
         AddNewsViewModel AddNews();
         Task<EditNewsViewModel> EditNews(string id);
         Task<bool> EditNews(EditNewsViewModel model);

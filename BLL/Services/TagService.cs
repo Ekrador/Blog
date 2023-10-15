@@ -43,7 +43,7 @@ namespace BLL.Services
         public async Task<bool> EditTag(EditTagViewModel model)
         {
             var tag = await _tagRep.Get(model.Id);
-            tag.Convert(model);
+            tag.Name = model.Name;
             return await _tagRep.Update(tag);
         }
 

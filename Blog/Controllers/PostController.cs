@@ -19,10 +19,12 @@ namespace Blog.Controllers
     {
         private readonly IPostService _postService;
         private readonly UserManager<User> _userManager;
-        public PostController(IPostService postService, UserManager<User> userManager)
+        private readonly ILogger<PostController> _logger;
+        public PostController(IPostService postService, UserManager<User> userManager, ILogger<PostController> logger)
         {
             _postService = postService;
             _userManager = userManager;
+            _logger = logger;
         }
 
         [Authorize]
@@ -47,6 +49,7 @@ namespace Blog.Controllers
                 var post = await _postService.CreatePost(model);
                 if (post != null)
                 {
+                    _logger.LogInformation($"the user wrote a new post {post}");
                     return RedirectToAction("ViewPost", "Post", new { Id = post });
                 }
                 else
@@ -78,6 +81,7 @@ namespace Blog.Controllers
                 var result = await _postService.EditPost(model);
                 if (result)
                 {
+                    _logger.LogInformation($"the user edited post {model.Id}");
                     return RedirectToAction("ViewPost", "Post", new { Id = model.Id });
                 }
                 else
@@ -94,6 +98,7 @@ namespace Blog.Controllers
         public async Task<IActionResult> RemovePost(string id)
         {
             await _postService.RemovePost(id);
+            _logger.LogWarning($"the user deleted post {id}");
             var posts = await _postService.GetAllPosts();
 
             return View("AllPosts", new AllPostsViewModel { Posts = posts });

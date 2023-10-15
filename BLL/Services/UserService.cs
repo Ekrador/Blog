@@ -5,6 +5,7 @@ using BLL.Models.Users;
 using BLL.Services.IServices;
 using DAL.Models;
 using DAL.Repositories;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -25,8 +26,9 @@ namespace BLL.Services
         private readonly RoleManager<Role> _roleManager;
         private readonly IRepository<Post> _postRep;
         private readonly IRepository<Comment> _commentRep;
+        private IHttpContextAccessor _httpContextAccessor;
         public UserService(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<Role> roleManager,
-            IMapper mapper, IRepository<Post> postrep, IRepository<Comment> commentrep)
+            IMapper mapper, IRepository<Post> postrep, IRepository<Comment> commentrep, IHttpContextAccessor httpContextAccessor)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -34,6 +36,7 @@ namespace BLL.Services
             _mapper = mapper;
             _postRep = postrep;
             _commentRep = commentrep;
+            _httpContextAccessor = httpContextAccessor;
         }
         public async Task Logout()
         {
@@ -137,6 +140,10 @@ namespace BLL.Services
         public async Task RemoveAccount(string id)
         {
             var user = await _userManager.FindByIdAsync(id);
+            if(_httpContextAccessor.HttpContext?.User.Identity.Name == user.UserName)
+            {
+                _signInManager.SignOutAsync();
+            }
             await _userManager.DeleteAsync(user);
         }
 
