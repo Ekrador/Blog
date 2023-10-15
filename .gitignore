@@ -363,3 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 /Blog/Data/Blog_db.db-shm
 /Blog/Data/Blog_db.db-wal
+/Blog/Migrations
