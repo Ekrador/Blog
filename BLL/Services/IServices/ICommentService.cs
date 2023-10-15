@@ -1,5 +1,5 @@
 ﻿using BLL.Models.Comments;
-using BLL.Models.Post;
+using BLL.Models.Posts;
 using DAL.Models;
 using System;
 using System.Collections.Generic;
@@ -12,13 +12,11 @@ namespace BLL.Services.IServices
     public interface ICommentService
     {
         Task<bool> WriteComment(CreateCommentViewModel model);
-
         Task<bool> EditComment(EditCommentViewModel model);
-
+        Task<EditCommentViewModel> EditComment(string id);
         Task<bool> RemoveComment(string id);
-
         Task<List<Comment>> GetAllComments();
-
-        Task<Comment> GetComment(string id);
+        Task<CommentsByAuthorViewModel> GetCommentsByAuthor(string authorId);
+        Task<CommentViewModel> ViewComment(string id);
     }
 }

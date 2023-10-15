@@ -10,7 +10,7 @@ namespace BLL.Models.Tags
     public class CreateTagViewModel
     {
         [Required(ErrorMessage = "Укажите название тега")]
-        [Display(Name = "Name")]
+        [Display(Name = "Name", Prompt = "Введите название тега")]
         public string Name { get; set; }
     }
 }

@@ -1,10 +1,12 @@
 ﻿using BLL.Models;
-using BLL.Models.Post;
+using BLL.Models.Posts;
+using BLL.Services;
 using BLL.Services.IServices;
 using DAL.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,10 +19,24 @@ namespace Blog.Controllers
     {
         private readonly IPostService _postService;
         private readonly UserManager<User> _userManager;
-        public PostController(IPostService postService, UserManager<User> userManager)
+        private readonly ILogger<PostController> _logger;
+        public PostController(IPostService postService, UserManager<User> userManager, ILogger<PostController> logger)
         {
             _postService = postService;
             _userManager = userManager;
+            _logger = logger;
+        }
+
+        [Authorize]
+        [HttpGet]
+        [Route("Post/Create")]
+        public async Task<IActionResult> CreatePost()
+        {
+            var model = await _postService.CreatePost();
+            var user = User;
+            var result = await _userManager.GetUserAsync(user);
+            model.AuthorId = result.Id;
+            return View(model);
         }
 
         [Authorize]
@@ -30,72 +46,96 @@ namespace Blog.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = User;
-                var result = await _userManager.GetUserAsync(user);
-                model.AuthorId = result.Id;
                 var post = await _postService.CreatePost(model);
-                if (post)
+                if (post != null)
                 {
-                    return StatusCode(200);
+                    _logger.LogInformation($"the user wrote a new post {post}");
+                    return RedirectToAction("ViewPost", "Post", new { Id = post });
                 }
                 else
                 {
-                    return StatusCode(500);
+                    ModelState.AddModelError("", "Некорректные данные");
                 }
             }
-            ModelState.AddModelError("", "Некорректные данные");
-            return StatusCode(400);
+            return RedirectToAction("CreatePost");
         }
 
-        [Authorize]
-        [HttpPut]
-        [Route("Post/Edit")]
-        public async Task<IActionResult> Edit(EditPostViewModel model)
+        [AuthorizationEditPost]
+        [HttpGet]
+        [Route("Post/Edit/{id}")]
+        public async Task<IActionResult> EditPost(string id)
+        {
+            var model = await _postService.EditPost(id);
+            if (model == null)
+                return StatusCode(404);
+            return View(model);
+        }
+
+        [AuthorizationEditPost]
+        [HttpPost]
+        [Route("Post/Edit/{id}")]
+        public async Task<IActionResult> EditPost(EditPostViewModel model)
         {
             if (ModelState.IsValid)
             {
                 var result = await _postService.EditPost(model);
                 if (result)
                 {
-                    return StatusCode(200);
+                    _logger.LogInformation($"the user edited post {model.Id}");
+                    return RedirectToAction("ViewPost", "Post", new { Id = model.Id });
                 }
                 else
                 {
-                    return StatusCode(501);
+                    ModelState.AddModelError("", "Некорректные данные");
                 }
             }
-            else
-            {
-                ModelState.AddModelError("", "Некорректные данные");
-                return StatusCode(400);
-            }
+            return View("EditPost", model);
         }
 
-        [HttpDelete]
-        [Authorize(Roles = "Администратор, Модератор")]
+        [HttpPost]
+        [AuthorizationEditPost]
         [Route("Post/RemovePost/{id}")]
-        public async Task<IActionResult> RemovePost([FromRoute] string id)
+        public async Task<IActionResult> RemovePost(string id)
         {
             await _postService.RemovePost(id);
-            return StatusCode(200);
+            _logger.LogWarning($"the user deleted post {id}");
+            var posts = await _postService.GetAllPosts();
+
+            return View("AllPosts", new AllPostsViewModel { Posts = posts });
         }
 
         [HttpGet]
         [Route("Post/AllPosts")]
-        public async Task<List<Post>> GetPosts()
+        public async Task<IActionResult> AllPosts()
         {
             var posts = await _postService.GetAllPosts();
 
-            return await Task.FromResult(posts);
+            return View(new AllPostsViewModel { Posts = posts });
         }
 
         [HttpGet]
-        [Route("Post/GetAuthorsPosts/{id}")]
-        public async Task<List<Post>> GetAuthorsPosts([FromRoute] string id)
+        [Route("Post/PostsByAuthor")]
+        public async Task<IActionResult> PostsByAuthor(string id)
         {
-            var posts = _postService.GetAuthorsPosts(id);
+            var posts = await _postService.GetPostsByAuthor(id);
 
-            return await Task.FromResult(posts.Result);
+            return View(posts);
+        }
+
+        [HttpGet]
+        [Route("Post/View")]
+        public async Task<IActionResult> ViewPost(string id)
+        {
+            var post = await _postService.ViewPost(id);
+            return View(post);
+        }
+
+        [HttpGet]
+        [Route("Post/ByTag")]
+        public async Task<IActionResult> PostsByTag(string id)
+        {
+            var posts = await _postService.GetPostsByTag(id);
+            return View(posts);
         }
     }
 }

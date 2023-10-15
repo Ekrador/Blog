@@ -7,11 +7,8 @@ using System.Threading.Tasks;
 
 namespace BLL.Models.Tags
 {
-    public class EditTagViewModel
+    public class EditTagViewModel : CreateTagViewModel
     {
-        [Required(ErrorMessage = "Укажите название тега")]
-        [Display(Name = "Name")]
-        public string Name { get; set; }
         public string Id { get; set; }
     }
 }

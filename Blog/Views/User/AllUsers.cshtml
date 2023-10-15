@@ -1,0 +1,40 @@
+﻿@using DAL.Models;
+@using Microsoft.AspNetCore.Identity;
+@model BLL.Models.Users.AllUsersViewModel
+@inject UserManager<User> UserManager;
+@{
+    ViewData["Title"] = "Список пользователей";
+}
+
+<h3 class="text-center">Все пользователи</h3>
+@if (Model.Users.Count != 0)
+{
+    @foreach (var user in @Model.Users)
+    {
+        <div class="card border-primary mb-3" style="width: 18rem;">
+            <div class="card-body">
+                <img class="float-left rounded-circle ava" src="@user.Avatar" />
+                <div class="message" style="text-align: end; padding:0,6rem,0,0 ">
+                    <div class="card-title">
+                        <a asp-action="UserPage" asp-route-id="@user.Id" method="get" style="text-decoration:none">
+                            <span class="badge badge-success">@user.LastName &nbsp @user.FirstName</span>
+                        </a>
+                    </div>
+                    <div class="card-subtitle mb-2">
+                        @foreach (var role in await UserManager.GetRolesAsync(user))
+                        {
+                            <span class="badge badge-info">&nbsp @role</span>
+                        }
+                    </div>
+                    <small class="card-subtitle mb-2 text-muted">@user.Email</small>
+                </div>
+            </div>
+        </div>
+    }
+}
+else
+{
+    <div>
+        <label> Поиск не дал результатов.</label>
+    </div>
+}

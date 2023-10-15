@@ -1,0 +1,43 @@
+﻿@using BLL.Models.Roles;
+@using DAL.Models;
+@using Microsoft.AspNetCore.Identity;
+@using System.Security.Claims;
+@model BLL.Models.Roles.RoleViewModel
+
+@{
+    ViewData["Title"] = "Роль " + "\"" + Model.Name +"\"";
+}
+
+<h4 class="center">Роль "@Model.Name"</h4>
+
+@if (User.IsInRole("Модератор") || User.IsInRole("Администратор") && !StandartRoles.Roles.Contains(Model.Name))
+{
+    <ul class="flexbox" style="max-width:max-content; padding:0">
+        <li style="max-width:max-content;display:inline-block">
+            <a method="get" asp-controller="Role" asp-action="EditRole" asp-route-id="@Model.Id">
+                <input class="btn btn-warning" type="submit" value="Редактировать" style="max-width:max-content;height: 28px;font-size:10px" />
+            </a>
+        </li>
+        <li style="max-width:max-content;display:inline-block">
+            <form method="post" asp-controller="Role" asp-action="RemoveRole" asp-route-id="@Model.Id">
+                <input class="btn btn-danger" type="submit" value="Удалить" style="max-width:max-content;height: 28px;font-size:10px" />
+            </form>
+        </li>
+    </ul>
+}
+<div>
+    <div>
+        <label class="gray-text">Пользователей с ролью: &nbsp @Model.Users.Count </label>
+    </div>
+    <h5>Пользователи:</h5>
+    <ul>
+        @foreach (var user in @Model.Users)
+        {
+            <li>
+                <a asp-controller="User" asp-action="UserPage" asp-route-id="@user.Id" method="get" style="text-decoration:none;">
+                    @user.GetFullName()
+                </a>
+            </li>
+        }
+    </ul>
+</div>

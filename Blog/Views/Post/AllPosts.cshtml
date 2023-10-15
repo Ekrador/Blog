@@ -1,0 +1,9 @@
+﻿@model BLL.Models.Posts.AllPostsViewModel
+
+@{
+    ViewData["Title"] = "Список статей";
+}
+<h3 class="text-center">Все статьи</h3>
+<a asp-controller="Post" asp-action="CreatePost" style="text-decoration:none;width:stretch;text-align:center;display:block"><b>Добавить статью</b></a>
+
+    <partial name="_partialAllPosts" model="@Model" />

@@ -1,0 +1,17 @@
+﻿@model BLL.Models.Comments.CreateCommentViewModel
+
+<form class="frm" method="post" asp-controller="Comment" asp-action="WriteComment">
+    <div asp-validation-summary="ModelOnly"></div>
+    <input type="hidden" asp-for="@Model.PostId" value="@Model.PostId" />
+    <input type="hidden" asp-for="@Model.AuthorId" value="@Model.AuthorId" />
+    <div>
+        <div class="mrgn">
+            <textarea asp-for="Content" class="form-control"></textarea>
+            <span asp-validation-for="Content" class="text-danger"></span>
+        </div>
+    </div>
+    
+    <div class="center">
+        <input class="btn btn-info" type="submit" value="Оставить коментарий" />
+    </div>
+</form>

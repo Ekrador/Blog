@@ -1,0 +1,56 @@
+﻿@if (Model.Comments.Count != 0)
+{
+    <div class="container">
+        <div class="row">
+            @foreach (var comment in @Model.Comments)
+            {
+                <div class="col-md-4">
+                    <div class="card border-primary mb-3" style="width: auto;">
+                        <div class="card-body" style="padding:4%;">
+                            <a asp-controller="Post" asp-action="ViewPost" asp-route-id="@comment.Post.Id" method="get" style="text-decoration:none">
+                                <div class="card-title" style="text-align:start">
+                                    <h4>@comment.Post.Title</h4>
+                                </div>
+                            </a>
+                            <a asp-controller="Comment" asp-action="ViewComment" asp-route-id="@comment.Id" method="get" style="text-decoration:none">
+                                <div class="card-subtitle mb-1">
+                                    <h5>@comment.Content</h5>
+                                </div>
+                            </a>
+                            <div class="card-subtitle mb-2 text-muted" style="text-align: end; padding:5px">
+                                <small class="card-subtitle mb-2 text-muted">@comment.CreationDate</small>
+                            </div>
+                            @if (User.IsInRole("Модератор")
+                           || User.IsInRole("Администратор")
+                           || User.Claims.Any(c => c.Type == "Comment" && c.Value == comment.Id))
+                            {
+                                <ul class="flexbox" style="float:right; padding-right:1%">
+                                    <li style="display:inline-block">
+                                        <a asp-area="" asp-controller="Comment" asp-action="EditComment" asp-route-id="@comment.Id" method="get" style="max-width:max-content">
+                                            <button type="submit" class="btn btn-warning" style="font-size:10px">
+                                                <b>Редактировать</b>
+                                            </button>
+                                        </a>
+                                    </li>
+                                    <li style="max-width:max-content;display:inline-block">
+                                        <form asp-area="" asp-controller="Comment" asp-action="RemoveComment" asp-route-id="@comment.Id" method="post" style="max-width:max-content">
+                                            <button type="submit" class="btn btn-danger" style="font-size:10px">
+                                                <b>Удалить</b>
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+else
+{
+    <div>
+        <label> Поиск не дал результатов.</label>
+    </div>
+}

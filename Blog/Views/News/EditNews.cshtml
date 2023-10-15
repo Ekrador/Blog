@@ -1,0 +1,26 @@
+﻿@model BLL.Models.News.EditNewsViewModel
+
+@{
+    ViewData["Title"] = "Редактирование новости";
+}
+
+<div class="block-reg background-white">
+    <h3 class="center">Редактирование новости</h3>
+    <form class="frm" method="post" asp-controller="News" asp-action="EditNews">
+        <div asp-validation-summary="ModelOnly"></div>
+        <input type="hidden" asp-for="Id" value="@Model.Id" />
+        <div>
+            <div class="mrgn">
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+            <div class="mrgn">
+                <textarea asp-for="Content" class="form-control"></textarea>
+                <span asp-validation-for="Content" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="center">
+            <input class="okbtn btn btn-success" type="submit" value="Изменить" />
+        </div>
+    </form>
+</div>

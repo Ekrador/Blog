@@ -1,0 +1,74 @@
+﻿@using BLL.Models.Comments;
+@using DAL.Models;
+@using Microsoft.AspNetCore.Identity;
+@using System.Security.Claims;
+@model BLL.Models.Comments.CommentViewModel
+@inject UserManager<User> UserManager;
+@using Microsoft.AspNetCore.Authorization
+@inject IAuthorizationService AuthorizationService
+
+
+@{
+    ViewData["Title"] = @Model.Post.Title;
+}
+<h3 class="text-start">@Model.Post.Title</h3>
+<div class="container">
+    Теги:&nbsp
+    @foreach (var tag in Model.Post.Tags)
+    {
+        <a asp-action="PostsByTag" asp-route-id="@tag.Id" method="get" style="text-decoration:none">
+            <span class="badge badge-info">@tag.Name&nbsp</span>
+        </a>
+    }
+
+    <a asp-controller="User" asp-action="UserPage" asp-route-id="@Model.Author.Id" method="get" style="text-decoration:none; flex-basis:revert;
+right: 0;">
+        <b style="float: right">
+            Автор статьи: @UserManager.FindByIdAsync(Model.Author.Id).Result.GetFullName()
+            <small class="text-muted" style="float: right;margin-top: 1%">&nbsp @Model.Post.CreationDate</small>
+        </b>
+    </a>
+</div>
+<div class="card border-primary mb-3" style="width: auto;padding:2%">
+
+    <h5>
+        &nbsp&nbsp&nbsp&nbsp @Model.Post.Content
+    </h5>
+</div>
+<div class="card border-primary mb-3" style="max-width: 50%; margin-left:4%">
+    <div class="card-body" style="padding:10px">
+        <div class="card-title" style="text-align:start">
+            <a asp-controller="User" asp-action="UserPage" asp-route-id="@Model.Author.Id" method="get" style="text-decoration:none">
+                <b>@Model.Author?.GetFullName()</b>
+            </a>
+        </div>
+        <div class="card-subtitle mb-1">
+            "@Model.Content"
+        </div>
+        <div class="card-subtitle mb-2 text-muted" style="text-align: end; padding:5px">
+            <small class="card-subtitle mb-2 text-muted">@Model.CreationDate</small>
+        </div>
+        @if (User.IsInRole("Модератор")
+        || User.IsInRole("Администратор")
+        || User.Claims.Any(c => c.Type == "Comment" && c.Value == Model.Id))
+        {
+            <ul class="flexbox" style="float:right">
+                <li style="display:inline-block">
+                    <form asp-area="" asp-controller="Comment" asp-action="EditComment" asp-route-id="@Model.Id" method="get" style="max-width:max-content">
+                        <button type="submit" class="btn btn-warning" style="font-size:10px">
+                            <b>Редактировать</b>
+                        </button>
+                    </form>
+                </li>
+                <li style="max-width:max-content;display:inline-block">
+                    <form asp-area="" asp-controller="Comment" asp-action="RemoveComment" asp-route-id="@Model.Id" method="post" style="max-width:max-content">
+                        <button type="submit" class="btn btn-danger" style="font-size:10px">
+                            <b>Удалить</b>
+                        </button>
+                    </form>
+                </li>
+            </ul>
+        }
+    </div>
+</div>
+

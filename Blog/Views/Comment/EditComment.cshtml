@@ -1,0 +1,21 @@
+﻿@model BLL.Models.Comments.EditCommentViewModel
+
+@{
+    ViewData["Title"] = "Редактирование комментария";
+}
+
+<div class="block-reg background-white">
+    <h3 class="center">Редактирование комментария</h3>
+    <form class="frm" method="post" asp-controller="Comment" asp-action="EditComment">
+        <div asp-validation-summary="ModelOnly"></div>
+        <input type="hidden" asp-for="Id" value="@Model.Id" />
+        <div>
+            <div class="mrgn">
+                <input asp-for="Content" class="form-control" />
+                <span asp-validation-for="Content" class="text-danger"></span>
+            </div>
+        <div class="center">
+                <input class="okbtn btn btn-success" type="submit" value="Изменить" />
+        </div>
+    </form>
+</div>

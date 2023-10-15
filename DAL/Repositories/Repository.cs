@@ -1,4 +1,5 @@
 ﻿using DAL.Context;
+using DAL.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -25,13 +26,13 @@ namespace DAL.Repositories
         public async Task<bool> Create(T item)
         {
             Set.Add(item);
-            return await _db.SaveChangesAsync() == 1;
+            return await _db.SaveChangesAsync() > 0;
         }
 
         public async Task<bool> Delete(T item)
         {
             Set.Remove(item);
-            return await _db.SaveChangesAsync() == 1;
+            return await _db.SaveChangesAsync() > 0;
         }
 
         public async Task<T> Get(string id)
@@ -47,7 +48,17 @@ namespace DAL.Repositories
         public async Task<bool> Update(T item)
         {
             Set.Update(item);
-            return await _db.SaveChangesAsync() == 1;
+            return await _db.SaveChangesAsync() > 0;
+        }
+
+        public async Task LoadAllNavigationPropertiesAsync(T item)
+        {
+            var entry = _db.Entry(item);
+
+            foreach (var navigationEntry in entry.Navigations)
+            {
+                await navigationEntry.LoadAsync();
+            }
         }
     }
 }

@@ -1,0 +1,10 @@
+﻿@using DAL.Models;
+@using Microsoft.AspNetCore.Identity;
+@model BLL.Models.Posts.PostsByTagViewModel
+
+@{
+    ViewData["Title"] = "Список статей";
+}
+<h3 class="text-center">Все статьи по тегу @Model.TagName</h3>
+    <partial name="_partialAllPosts" model="@Model" />
+

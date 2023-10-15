@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,6 +16,7 @@ namespace DAL.Models
         public User Author { get; set; }
         public List<Tag> Tags { get; set; } = new();
         public List<Comment> Comments { get; set; } = new();
+        public int ViewCount { get; set; } = 0;
         public Post() 
         { 
             Id = Guid.NewGuid().ToString();

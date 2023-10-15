@@ -1,4 +1,4 @@
-﻿using BLL.Models.Post;
+﻿using BLL.Models.Posts;
 using DAL.Models;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -11,14 +11,16 @@ namespace BLL.Services.IServices
 {
     public interface IPostService
     {
-        Task<bool> CreatePost(CreatePostViewModel model);
-
+        Task<string> CreatePost(CreatePostViewModel model);
+        Task<CreatePostViewModel> CreatePost();
+        Task<EditPostViewModel> EditPost(string id);
         Task<bool> EditPost(EditPostViewModel model);
-
         Task<bool> RemovePost(string id);
-
         Task<List<Post>> GetAllPosts();
-
         Task<List<Post>> GetAuthorsPosts(string authorId);
+        Task<PostsByAuthorViewModel> GetPostsByAuthor(string authorId);
+        Task<PostViewModel> ViewPost(string id);
+        Task<PostsByTagViewModel> GetPostsByTag(string id);
+        Task<Post> GetPostById(string id);
     }
 }

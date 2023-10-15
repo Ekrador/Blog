@@ -1,0 +1,10 @@
+﻿@using DAL.Models;
+@using Microsoft.AspNetCore.Identity;
+@model BLL.Models.Comments.CommentsByAuthorViewModel
+
+@{
+    ViewData["Title"] = "Все комментарии пользователя " + Model.AuthorName;
+}
+<h3 class="text-center">Все комментарии пользователя @Model.AuthorName</h3>
+<partial name="_partialAllComments" model="@Model" />
+

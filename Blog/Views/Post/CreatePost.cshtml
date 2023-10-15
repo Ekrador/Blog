@@ -1,0 +1,58 @@
+﻿@model BLL.Models.Posts.CreatePostViewModel
+
+@{
+    ViewData["Title"] = "Добавление статьи";
+}
+
+<div class="block-reg background-white">
+    <h3 class="center">Добавление статьи</h3>
+    <form class="frm" method="post" asp-controller="Post" asp-action="CreatePost">
+        <div asp-validation-summary="ModelOnly"></div>
+        <div>
+            <input type="hidden" asp-for="AuthorId" value="@Model.AuthorId" />
+            <div class="mrgn">
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+            <div class="mrgn">
+                <textarea asp-for="Content" class="form-control"></textarea>
+            </div>
+        </div>
+        <div class="pos-f-t">
+            <div class="collapse" id="navbarToggleExternalContent">
+                    <div class="container" style="flex-wrap:wrap">
+                    @if (Model.Tags?.Count > 0)
+                    {
+                        @for (int i = 0; i < Model.Tags?.Count; i++)
+                        {
+                            @Html.CheckBoxFor(model => model.Tags[i].IsChecked,  new { @class = "checkbox-input" })
+                            <span class="checkbox-text">@Model.Tags[i].Name</span>
+                            @Html.HiddenFor(model => model.Tags[i].TagId)
+                            @Html.HiddenFor(model => model.Tags[i].Name)
+
+                        }
+
+                    }
+                    else
+                    {
+                        <span>Пока нет ни одного тега</span>
+                    }
+                </div>
+            </div>
+            <nav class="navbar">
+                <button class="btn btn-light" id="tagbtn" style="font-size:20; font-weight:bold" type="button" data-toggle="collapse" data-target="#navbarToggleExternalContent">
+                    ☰ Выбрать теги
+                </button>
+            </nav>
+        </div>
+        <div class="center">
+            <input class="okbtn btn btn-success" type="submit" value="Добавить" />
+        </div>
+    </form>
+</div>
+
+<script>
+    document.getElementById('tagbtn').addEventListener('click', function () {
+        this.blur(); 
+    });
+</script>

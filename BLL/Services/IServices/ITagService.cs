@@ -1,4 +1,4 @@
-﻿using BLL.Models.Post;
+﻿using BLL.Models.Posts;
 using BLL.Models.Tags;
 using DAL.Models;
 using System;
@@ -14,6 +14,7 @@ namespace BLL.Services.IServices
         Task<bool> CreateTag(CreateTagViewModel model);
 
         Task<bool> EditTag(EditTagViewModel model);
+        Task<EditTagViewModel> EditTag(string id);
 
         Task<bool> RemoveTag(string id);
 

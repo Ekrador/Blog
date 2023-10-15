@@ -1,5 +1,6 @@
 ﻿using BLL.Models.Comments;
 using BLL.Models.Tags;
+using BLL.Services;
 using BLL.Services.IServices;
 using DAL.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -15,9 +16,18 @@ namespace Blog.Controllers
     public class TagController : Controller
     {
         private readonly ITagService _tagService;
-        public TagController(ITagService tagService)
+        private readonly ILogger<TagController> _logger;
+        public TagController(ITagService tagService, ILogger<TagController> logger)
         {
             _tagService = tagService;
+            _logger = logger;
+        }
+
+        [HttpGet]
+        [Route("Tag/Create")]
+        public async Task<IActionResult> CreateTag()
+        {
+            return View(new CreateTagViewModel());
         }
 
         [Authorize(Roles = "Администратор, Модератор")]
@@ -30,57 +40,67 @@ namespace Blog.Controllers
                 var tag = await _tagService.CreateTag(model);
                 if (tag)
                 {
-                    return StatusCode(200);
+                    _logger.LogInformation("new tag created");
+                    return RedirectToAction("AllTags", "Tag");
                 }
                 else
                 {
-                    return StatusCode(500);
+                    ModelState.AddModelError("", "Некорректные данные");
                 }
             }
-            ModelState.AddModelError("", "Некорректные данные");
-            return StatusCode(400);
+            return View("CreateTag", model);
         }
 
         [Authorize(Roles = "Администратор, Модератор")]
-        [HttpPut]
+        [HttpGet]
         [Route("Tag/Edit")]
-        public async Task<IActionResult> Edit(EditTagViewModel model)
+        public async Task<IActionResult> EditTag(string id)
+        {
+            var model = await _tagService.EditTag(id);
+            if (model == null)
+                return StatusCode(404);
+            return View(model);
+        }
+
+        [Authorize(Roles = "Администратор, Модератор")]
+        [HttpPost]
+        [Route("Tag/Edit")]
+        public async Task<IActionResult> EditTag(EditTagViewModel model)
         {
             if (ModelState.IsValid)
             {
-                var tag = await _tagService.EditTag(model);
-                if (tag)
+                var result = await _tagService.EditTag(model);
+                if (result)
                 {
-                    return StatusCode(200);
+                    _logger.LogInformation($"tag edited: {model.Id}");
+                    return RedirectToAction("AllTags", "Tag");
                 }
                 else
                 {
-                    return StatusCode(501);
+                    ModelState.AddModelError("", "Некорректное имя тега");
                 }
             }
-            else
-            {
-                ModelState.AddModelError("", "Некорректные данные");
-                return StatusCode(400);
-            }
+            ModelState.AddModelError("", "Некорректные данные");
+            return View("Edit", model);
         }
 
-        [HttpDelete]
+        [HttpPost]
         [Authorize(Roles = "Администратор, Модератор")]
-        [Route("Tag/RemoveTag/{id}")]
-        public async Task<IActionResult> RemoveTag([FromRoute] string id)
+        [Route("Tag/RemoveTag")]
+        public async Task<IActionResult> RemoveTag(string id)
         {
             await _tagService.RemoveTag(id);
-            return StatusCode(200);
+            _logger.LogWarning($"tag deleted: {id}");
+            return RedirectToAction("AllTags", "Tag");
         }
 
         [HttpGet]
         [Route("Tag/AllTags")]
-        public async Task<List<Tag>> GetTags()
+        public async Task<IActionResult> AllTags()
         {
-            var tag = await _tagService.GetAllTags();
+            var tags = await _tagService.GetAllTags();
 
-            return await Task.FromResult(tag);
+            return View( new AllTagsViewModel { Tags = tags});
         }
 
         [Authorize(Roles = "Администратор, Модератор")]

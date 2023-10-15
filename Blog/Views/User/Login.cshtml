@@ -1,0 +1,30 @@
+﻿@model BLL.Models.Users.UserLoginViewModel
+
+@{
+    ViewData["Title"] = "Вход в аккаунт";
+}
+
+<div class="block-reg background-white">
+    <h3 class="center">Войти в аккаунт</h3>
+    <form class="frm" method="post" asp-controller="User" asp-action="Authenticate" >
+        <div asp-validation-summary="ModelOnly"></div>
+        <div>
+            <div class="mrgn">
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+        </div>
+        <div>
+            <div class="mrgn">
+                <input asp-for="Password" class="form-control" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="center" style="margin:1%">
+            <input class="okbtn btn btn-success" type="submit" value="Войти" />
+        </div>
+        <div class="center">
+            <p>Еще нет аккаунта? <a asp-controller="User" asp-action="RegisterAccount">Зарегистрируйтесь.</a></p>
+        </div>
+    </form>
+</div>

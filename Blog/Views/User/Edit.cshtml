@@ -1,0 +1,88 @@
+﻿@model BLL.Models.Users.UserEditViewModel
+@using BLL.Models.Roles
+
+@{
+    ViewData["Title"] = "Редактирование пользователя";
+}
+<div class="block-reg background-white">
+    <h3 class="center">Редактировать данные пользователя</h3>
+    <form class="frm" method="post" asp-controller="User" asp-action="Edit">
+        <div asp-validation-summary="ModelOnly"></div>
+        <div>
+            <input type="hidden" asp-for="Id" value="@Model.Id" />
+            <div class="container" style="flex-wrap:wrap">
+                @for (int i = 0; i < Model.Roles?.Count; i++)
+                {
+                    <input type="hidden" asp-for="Roles[i].Id" value="@Model.Roles[i].Id" />
+                    @if (!User.IsInRole("Администратор") || StandartRoles.Roles.Contains(Model.Roles[i].Name))
+                    {
+                        @Html.CheckBoxFor(model =>model.Roles[i].IsChecked, new {@class = "checkbox-input", @disabled = "disabled"})
+                        <input type="hidden" asp-for="@Model.Roles[i].IsChecked" value="@Model.Roles[i].IsChecked" />
+                    }
+                    else
+                    {
+                        @Html.CheckBoxFor(model => model.Roles[i].IsChecked,  new {@class = "checkbox-input"})
+                    }
+                    <span class="checkbox-text" title="model.Roles[i].Description">@Model.Roles[i].Name</span>
+                    @Html.HiddenFor(model => model.Roles[i].Description)
+                    @Html.HiddenFor(model => model.Roles[i].Name)
+                }
+            </div>
+            <div class="mrgn">
+                <input asp-for="FirstName" class="form-control" />
+                <span asp-validation-for="FirstName" class="text-danger"></span>
+            </div>
+        </div>
+        <div>
+            <div class="mrgn">
+                <input asp-for="LastName" class="form-control" />
+                <span asp-validation-for="LastName" class="text-danger"></span>
+            </div>
+        </div>
+        <div>
+            <div class="mrgn">
+                <input asp-for="MiddleName" class="form-control" />
+                <span asp-validation-for="MiddleName" class="text-danger"></span>
+            </div>
+        </div>
+        <div>
+            <div class="mrgn">
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+        </div>
+        <div>
+            <div class="mrgn">
+                <input asp-for="BirthDate" class="form-control date_control" />
+                <span asp-validation-for="BirthDate" class="text-danger"></span>
+            </div>
+        </div>
+        <div>
+            <div class="mrgn">
+                <input asp-for="Avatar" class="form-control" />
+                <span asp-validation-for="Avatar" class="text-danger"></span>
+            </div>
+        </div>      
+        <div>
+            <div class="mrgn">
+                <textarea asp-for="About" class="form-control"></textarea>
+                <span asp-validation-for="About" class="text-danger"></span>
+            </div>
+        </div>
+        <div>
+            <div class="mrgn">
+                <input asp-for="OldPassword" class="form-control" />
+                <span asp-validation-for="OldPassword" class="text-danger"></span>
+            </div>
+        </div>
+        <div>
+            <div class="mrgn">
+                <input asp-for="NewPassword" class="form-control" />
+                <span asp-validation-for="NewPassword" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="center">
+            <input class="okbtn btn btn-success" type="submit" value="Обновить данные" />
+        </div>
+    </form>
+</div>
