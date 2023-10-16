@@ -53,7 +53,7 @@
         </div>
         <div>
             <div class="mrgn">
-                <input asp-for="BirthDate" class="form-control date_control" />
+                <input asp-for="BirthDate" class="form-control date_control" value="@Model.BirthDate.ToString("yyyy-MM-dd")" />
                 <span asp-validation-for="BirthDate" class="text-danger"></span>
             </div>
         </div>
