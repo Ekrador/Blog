@@ -1,15 +1,14 @@
-﻿using BLL.Models.News;
+﻿/*using BLL.Models.News;
 using BLL.Services.IServices;
+using Blog;
 using DAL.Models;
-using DAL.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Blog.Controllers
+namespace API.Controllers
 {
-    [ApiExplorerSettings(IgnoreApi = true)]
-    public class NewsController : Controller
+    public class NewsController : ControllerBase
     {
         private readonly INewsService _newsService;
         private readonly UserManager<User> _userManager;
@@ -103,3 +102,4 @@ namespace Blog.Controllers
         }
     }
 }
+*/

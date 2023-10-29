@@ -1,20 +1,12 @@
-﻿using BLL.Models.Comments;
-using BLL.Models.Tags;
-using BLL.Services;
+﻿/*using BLL.Models.Tags;
 using BLL.Services.IServices;
 using DAL.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Blog.Controllers
+namespace API.Controllers
 {
-    [ApiExplorerSettings(IgnoreApi = true)]
-    public class TagController : Controller
+    public class TagController : ControllerBase
     {
         private readonly ITagService _tagService;
         private readonly ILogger<TagController> _logger;
@@ -101,7 +93,7 @@ namespace Blog.Controllers
         {
             var tags = await _tagService.GetAllTags();
 
-            return View( new AllTagsViewModel { Tags = tags});
+            return View(new AllTagsViewModel { Tags = tags });
         }
 
         [Authorize(Roles = "Администратор, Модератор")]
@@ -115,3 +107,4 @@ namespace Blog.Controllers
         }
     }
 }
+*/

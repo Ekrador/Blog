@@ -1,14 +1,13 @@
-﻿using BLL.Models.Roles;
+﻿/*using BLL.Models.Roles;
 using BLL.Services.IServices;
 using DAL.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Blog.Controllers
+namespace API.Controllers
 {
-    [ApiExplorerSettings(IgnoreApi = true)]
-    public class RoleController : Controller
+    public class RoleController : ControllerBase
     {
         private readonly RoleManager<Role> _roleManager;
         private readonly IRoleService _roleService;
@@ -102,7 +101,7 @@ namespace Blog.Controllers
         {
             var roles = await _roleService.GetAllRoles();
 
-            return View(new AllRolesViewModel { Roles = roles});
+            return View(new AllRolesViewModel { Roles = roles });
         }
 
         [HttpGet]
@@ -114,3 +113,4 @@ namespace Blog.Controllers
         }
     }
 }
+*/

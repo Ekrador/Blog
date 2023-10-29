@@ -137,14 +137,14 @@ namespace BLL.Services
             return result;
         }
 
-        public async Task RemoveAccount(string id)
+        public async Task<IdentityResult> RemoveAccount(string id)
         {
             var user = await _userManager.FindByIdAsync(id);
             if(_httpContextAccessor.HttpContext?.User.Identity.Name == user.UserName)
             {
                 _signInManager.SignOutAsync();
             }
-            await _userManager.DeleteAsync(user);
+            return await _userManager.DeleteAsync(user);
         }
 
         private async Task AddPostsClaim(User user, List<string> postsIdsToClaim)

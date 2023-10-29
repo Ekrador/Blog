@@ -1,23 +1,15 @@
-﻿using BLL.Models.Comments;
-using BLL.Models.Posts;
-using BLL.Models.Tags;
-using BLL.Services;
+﻿/*using BLL.Models.Comments;
 using BLL.Services.IServices;
+using Blog;
 using DAL.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Hosting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Blog.Controllers
+namespace API.Controllers
 {
-    [ApiExplorerSettings(IgnoreApi = true)]
-    public class CommentController : Controller
+    public class CommentController : ControllerBase
     {
         private readonly ICommentService _commentService;
         private readonly UserManager<User> _userManager;
@@ -121,3 +113,4 @@ namespace Blog.Controllers
         }
     }
 }
+*/

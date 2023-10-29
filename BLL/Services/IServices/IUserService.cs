@@ -16,7 +16,7 @@ namespace BLL.Services.IServices
         Task Logout();
         Task<UserEditViewModel> EditAccount(string id);
         Task<IdentityResult> EditAccount(UserEditViewModel model);
-        Task RemoveAccount(string id);
+        Task<IdentityResult> RemoveAccount(string id);
         Task<List<User>> GetAccounts();
         Task<User> GetAccount(string id);
         Task<UserViewModel> UserPage(string id);

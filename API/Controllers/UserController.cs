@@ -1,27 +1,15 @@
 ﻿using AutoMapper;
-using BLL.Extensions;
 using BLL.Models.Users;
 using BLL.Services.IServices;
+using Blog;
 using DAL.Models;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
-namespace Blog.Controllers
+namespace API.Controllers
 {
-    [ApiExplorerSettings(IgnoreApi = true)]
-    public class UserController : Controller
+    public class UserController : ControllerBase
     {
         private readonly IMapper _mapper;
         private readonly IUserService _userService;
@@ -38,17 +26,10 @@ namespace Blog.Controllers
             _logger = logger;
         }
 
-        [HttpGet]
-        [Route("User/Login")]
-        public IActionResult Login()
-        {
-            return View(new UserLoginViewModel());
-        }
-
-        [Route("User/Authenticate")]
+        [Route("API/User/Authenticate")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Authenticate(UserLoginViewModel model)
+        public async Task<IActionResult> Authenticate([FromBody] UserLoginViewModel model)
         {
             if (ModelState.IsValid)
             {
@@ -57,38 +38,30 @@ namespace Blog.Controllers
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("пользователь успешно вошел в систему");
-                    return RedirectToAction("Index", "Home");
+                    return StatusCode(200);
                 }
                 else
                 {
                     ModelState.AddModelError("", "Неправильный логин и (или) пароль");
-                    return View("Login", model);
                 }
             }
             ModelState.AddModelError("", "Некорректные данные");
-            return View("Login", model);
+            return StatusCode(400);
         }
 
         [HttpPost]
         [Authorize]
-        [Route("User/Logout")]
+        [Route("API/User/Logout")]
         public async Task<IActionResult> Logout()
         {
             await _userService.Logout();
             _logger.LogInformation("пользователь вышел из системы");
-            return RedirectToAction("Index", "Home");
-        }
-
-        [HttpGet]
-        [Route("User/Register")]
-        public IActionResult RegisterAccount()
-        {
-            return View(new UserRegisterViewModel());
+            return StatusCode(200);
         }
 
         [HttpPost]
-        [Route("User/Register")]
-        public async Task<IActionResult> RegisterAccount(UserRegisterViewModel model)
+        [Route("API/User/Register")]
+        public async Task<IActionResult> RegisterAccount([FromBody] UserRegisterViewModel model)
         {
             if (ModelState.IsValid)
             {
@@ -96,7 +69,7 @@ namespace Blog.Controllers
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("создан новый аккаунт");
-                    return RedirectToAction("Index", "Home");
+                    return StatusCode(200);
                 }
                 else
                 {
@@ -106,33 +79,23 @@ namespace Blog.Controllers
                     }
                 }
             }
-            return View("RegisterAccount", model);
-        }
-
-        [AuthorizationEditUser]
-        [Route("User/Edit/{id}")]
-        [HttpGet]
-        public async Task<IActionResult> Edit(string id)
-        {
-            var model = await _userService.EditAccount(id);
-            if (model == null)
-                return StatusCode(404);
-            return View(model);
+            return StatusCode(400);
         }
 
 
         [AuthorizationEditUser]
-        [Route("User/Edit/{id}")]
-        [HttpPost]
-        public async Task<IActionResult> Edit(UserEditViewModel model)
+        [Route("API/User/Edit/{id}")]
+        [HttpPatch]
+        public async Task<IActionResult> Edit([FromRoute] string id, [FromBody] UserEditViewModel model)
         {
             if (ModelState.IsValid)
             {
+                model.Id = id;
                 var result = await _userService.EditAccount(model);
                 if (result.Succeeded)
                 {
                     _logger.LogInformation($"информация пользователя изменена: {model.Id}");
-                    return RedirectToAction("UserPage", "User", new { Id = model.Id });
+                    return StatusCode(200);
                 }
                 else
                 {
@@ -142,19 +105,19 @@ namespace Blog.Controllers
                     }
                 }
             }
-            return View("Edit", model);
+            return StatusCode(404);
         }
 
-        [AuthorizationEditUser]
-        [HttpPost]
-        [Route("User/RemoveAccount/{id}")]
-        public async Task<IActionResult> RemoveAccount(string id)
+        [Authorize]
+        [HttpDelete]
+        [Route("API/User/RemoveAccount/{id}")]
+        public async Task<IActionResult> RemoveAccount([FromRoute]string id)
         {
             var result = await _userService.RemoveAccount(id);
             if (result.Succeeded)
             {
                 _logger.LogWarning($"аккаунт удален: {id}");
-                return RedirectToAction("Index", "Home");
+                return StatusCode(200);
             }
             else
             {
@@ -162,20 +125,19 @@ namespace Blog.Controllers
             }
         }
         [HttpGet]
-        [Route("User/AllAccounts")]
-        public async Task<IActionResult> AllUsers()
+        [Route("API/User/AllAccounts")]
+        public async Task<List<User>> AllUsers()
         {
             var users = await _userService.GetAccounts();
-            var model = new AllUsersViewModel { Users = users };
-            return View(model);
+            return users;
         }
 
         [HttpGet]
-        [Route("User/View")]
-        public async Task<IActionResult> UserPage(string id)
+        [Route("API/User/View/{id}")]
+        public async Task<User> UserById([FromRoute] string id)
         {
-            var user = await _userService.UserPage(id);
-            return View(user);
+            var user = await _userService.GetAccount(id);
+            return user;
         }
     }
 }

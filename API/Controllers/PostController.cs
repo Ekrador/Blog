@@ -1,22 +1,14 @@
-﻿using BLL.Models;
-using BLL.Models.Posts;
-using BLL.Services;
+﻿/*using BLL.Models.Posts;
 using BLL.Services.IServices;
+using Blog;
 using DAL.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Hosting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Blog.Controllers
+namespace API.Controllers
 {
-    [ApiExplorerSettings(IgnoreApi = true)]
-    public class PostController : Controller
+    public class PostController : ControllerBase
     {
         private readonly IPostService _postService;
         private readonly UserManager<User> _userManager;
@@ -140,3 +132,4 @@ namespace Blog.Controllers
         }
     }
 }
+*/
