@@ -1,4 +1,4 @@
-﻿/*using BLL.Models.Roles;
+﻿using BLL.Models.Roles;
 using BLL.Services.IServices;
 using DAL.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -19,17 +19,10 @@ namespace API.Controllers
             _logger = logger;
         }
 
-        [HttpGet]
-        [Route("Role/Create")]
-        public async Task<IActionResult> CreateRole()
-        {
-            return View(new CreateRoleViewModel());
-        }
-
         [Authorize(Roles = "Администратор, Модератор")]
         [HttpPost]
-        [Route("Role/Create")]
-        public async Task<IActionResult> CreateRole(CreateRoleViewModel model)
+        [Route("API/Role/Create")]
+        public async Task<IActionResult> CreateRole([FromBody] CreateRoleViewModel model)
         {
             if (ModelState.IsValid)
             {
@@ -37,7 +30,7 @@ namespace API.Controllers
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("new role created");
-                    return RedirectToAction("AllRoles", "Role");
+                    return StatusCode(200);
                 }
                 else
                 {
@@ -47,24 +40,13 @@ namespace API.Controllers
                     }
                 }
             }
-            return View("CreateRole", model);
+            return StatusCode(400);
         }
 
         [Authorize(Roles = "Администратор, Модератор")]
-        [HttpGet]
-        [Route("Role/Edit")]
-        public async Task<IActionResult> EditRole(string id)
-        {
-            var model = await _roleService.EditRole(id);
-            if (model == null)
-                return StatusCode(404);
-            return View(model);
-        }
-
-        [Authorize(Roles = "Администратор, Модератор")]
-        [HttpPost]
-        [Route("Role/Edit")]
-        public async Task<IActionResult> EditRole(EditRoleViewModel model)
+        [HttpPatch]
+        [Route("API/Role/Edit")]
+        public async Task<IActionResult> EditRole([FromBody] EditRoleViewModel model)
         {
             if (ModelState.IsValid)
             {
@@ -72,7 +54,7 @@ namespace API.Controllers
                 if (result.Succeeded)
                 {
                     _logger.LogInformation($"edited role {model.Id}");
-                    return RedirectToAction("AllRoles");
+                    return StatusCode(200);
                 }
                 else
                 {
@@ -82,35 +64,41 @@ namespace API.Controllers
                     }
                 }
             }
-            return View("EditRole", model);
+            return StatusCode(404);
         }
 
-        [HttpPost]
+        [HttpDelete]
         [Authorize(Roles = "Администратор, Модератор")]
-        [Route("Role/RemoveRole")]
-        public async Task<IActionResult> RemoveRole(string id)
+        [Route("API/Role/RemoveRole")]
+        public async Task<IActionResult> RemoveRole([FromBody] string id)
         {
-            await _roleService.RemoveRole(id);
-            _logger.LogWarning($"removed role {id}");
-            return RedirectToAction("AllRoles", "Role");
+            var result = await _roleService.RemoveRole(id);
+            if (result.Succeeded)
+            {
+                _logger.LogWarning($"removed role {id}");
+                return StatusCode(200);
+            }
+            else
+            {
+                return StatusCode(404);
+            }
         }
 
         [HttpGet]
-        [Route("Role/AllRoles")]
-        public async Task<IActionResult> AllRoles()
+        [Route("API/Role/AllRoles")]
+        public async Task<List<Role>> AllRoles()
         {
             var roles = await _roleService.GetAllRoles();
 
-            return View(new AllRolesViewModel { Roles = roles });
+            return roles;
         }
 
         [HttpGet]
-        [Route("Role/ViewRole")]
-        public async Task<IActionResult> ViewRole(string id)
+        [Route("API/Role/ViewRole")]
+        public async Task<RoleViewModel> ViewRole([FromBody] string id)
         {
             var role = await _roleService.ViewRole(id);
-            return View(role);
+            return role;
         }
     }
 }
-*/

@@ -1,4 +1,4 @@
-﻿/*using BLL.Models.Tags;
+﻿using BLL.Models.Tags;
 using BLL.Services.IServices;
 using DAL.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -16,17 +16,10 @@ namespace API.Controllers
             _logger = logger;
         }
 
-        [HttpGet]
-        [Route("Tag/Create")]
-        public async Task<IActionResult> CreateTag()
-        {
-            return View(new CreateTagViewModel());
-        }
-
         [Authorize(Roles = "Администратор, Модератор")]
         [HttpPost]
-        [Route("Tag/Create")]
-        public async Task<IActionResult> CreateTag(CreateTagViewModel model)
+        [Route("API/Tag/Create")]
+        public async Task<IActionResult> CreateTag([FromBody] CreateTagViewModel model)
         {
             if (ModelState.IsValid)
             {
@@ -34,31 +27,20 @@ namespace API.Controllers
                 if (tag)
                 {
                     _logger.LogInformation("new tag created");
-                    return RedirectToAction("AllTags", "Tag");
+                    return StatusCode(200);
                 }
                 else
                 {
                     ModelState.AddModelError("", "Некорректные данные");
                 }
             }
-            return View("CreateTag", model);
+            return StatusCode(400);
         }
 
         [Authorize(Roles = "Администратор, Модератор")]
-        [HttpGet]
-        [Route("Tag/Edit")]
-        public async Task<IActionResult> EditTag(string id)
-        {
-            var model = await _tagService.EditTag(id);
-            if (model == null)
-                return StatusCode(404);
-            return View(model);
-        }
-
-        [Authorize(Roles = "Администратор, Модератор")]
-        [HttpPost]
-        [Route("Tag/Edit")]
-        public async Task<IActionResult> EditTag(EditTagViewModel model)
+        [HttpPatch]
+        [Route("API/Tag/Edit")]
+        public async Task<IActionResult> EditTag([FromBody] EditTagViewModel model)
         {
             if (ModelState.IsValid)
             {
@@ -66,7 +48,7 @@ namespace API.Controllers
                 if (result)
                 {
                     _logger.LogInformation($"tag edited: {model.Id}");
-                    return RedirectToAction("AllTags", "Tag");
+                    return StatusCode(200);
                 }
                 else
                 {
@@ -74,37 +56,43 @@ namespace API.Controllers
                 }
             }
             ModelState.AddModelError("", "Некорректные данные");
-            return View("Edit", model);
+            return StatusCode(404);
         }
 
-        [HttpPost]
+        [HttpDelete]
         [Authorize(Roles = "Администратор, Модератор")]
-        [Route("Tag/RemoveTag")]
-        public async Task<IActionResult> RemoveTag(string id)
+        [Route("API/Tag/RemoveTag")]
+        public async Task<IActionResult> RemoveTag([FromBody] string id)
         {
-            await _tagService.RemoveTag(id);
-            _logger.LogWarning($"tag deleted: {id}");
-            return RedirectToAction("AllTags", "Tag");
+            var result = await _tagService.RemoveTag(id);
+            if (result)
+            {
+                _logger.LogWarning($"tag deleted: {id}");
+                return StatusCode(200);
+            }
+            else
+            {
+                return StatusCode(404);
+            }
         }
 
         [HttpGet]
-        [Route("Tag/AllTags")]
-        public async Task<IActionResult> AllTags()
+        [Route("API/Tag/AllTags")]
+        public async Task<List<Tag>> AllTags()
         {
             var tags = await _tagService.GetAllTags();
 
-            return View(new AllTagsViewModel { Tags = tags });
+            return tags;
         }
 
         [Authorize(Roles = "Администратор, Модератор")]
         [HttpGet]
-        [Route("Tag/GetTag/{id}")]
+        [Route("API/Tag/GetTag/{id}")]
         public async Task<Tag> GetTag([FromRoute] string id)
         {
-            var tag = _tagService.GetTag(id);
+            var tag = await _tagService.GetTag(id);
 
-            return await Task.FromResult(tag.Result);
+            return tag;
         }
     }
 }
-*/

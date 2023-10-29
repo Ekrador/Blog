@@ -1,4 +1,4 @@
-﻿/*using BLL.Models.Posts;
+﻿using BLL.Models.Posts;
 using BLL.Services.IServices;
 using Blog;
 using DAL.Models;
@@ -21,21 +21,9 @@ namespace API.Controllers
         }
 
         [Authorize]
-        [HttpGet]
-        [Route("Post/Create")]
-        public async Task<IActionResult> CreatePost()
-        {
-            var model = await _postService.CreatePost();
-            var user = User;
-            var result = await _userManager.GetUserAsync(user);
-            model.AuthorId = result.Id;
-            return View(model);
-        }
-
-        [Authorize]
         [HttpPost]
-        [Route("Post/Create")]
-        public async Task<IActionResult> CreatePost(CreatePostViewModel model)
+        [Route("API/Post/Create")]
+        public async Task<IActionResult> CreatePost([FromBody] CreatePostViewModel model)
         {
             if (ModelState.IsValid)
             {
@@ -43,31 +31,20 @@ namespace API.Controllers
                 if (post != null)
                 {
                     _logger.LogInformation($"the user wrote a new post {post}");
-                    return RedirectToAction("ViewPost", "Post", new { Id = post });
+                    return StatusCode(200);
                 }
                 else
                 {
                     ModelState.AddModelError("", "Некорректные данные");
                 }
             }
-            return RedirectToAction("CreatePost");
+            return StatusCode(400);
         }
 
         [AuthorizationEditPost]
-        [HttpGet]
-        [Route("Post/Edit/{id}")]
-        public async Task<IActionResult> EditPost(string id)
-        {
-            var model = await _postService.EditPost(id);
-            if (model == null)
-                return StatusCode(404);
-            return View(model);
-        }
-
-        [AuthorizationEditPost]
-        [HttpPost]
-        [Route("Post/Edit/{id}")]
-        public async Task<IActionResult> EditPost(EditPostViewModel model)
+        [HttpPatch]
+        [Route("API/Post/Edit")]
+        public async Task<IActionResult> EditPost([FromBody] EditPostViewModel model)
         {
             if (ModelState.IsValid)
             {
@@ -75,61 +52,64 @@ namespace API.Controllers
                 if (result)
                 {
                     _logger.LogInformation($"the user edited post {model.Id}");
-                    return RedirectToAction("ViewPost", "Post", new { Id = model.Id });
+                    return StatusCode(200);
                 }
                 else
                 {
                     ModelState.AddModelError("", "Некорректные данные");
                 }
             }
-            return View("EditPost", model);
+            return StatusCode(404);
         }
 
-        [HttpPost]
+        [HttpDelete]
         [AuthorizationEditPost]
-        [Route("Post/RemovePost/{id}")]
-        public async Task<IActionResult> RemovePost(string id)
+        [Route("API/Post/RemovePost/{id}")]
+        public async Task<IActionResult> RemovePost([FromRoute] string id)
         {
-            await _postService.RemovePost(id);
-            _logger.LogWarning($"the user deleted post {id}");
-            var posts = await _postService.GetAllPosts();
-
-            return View("AllPosts", new AllPostsViewModel { Posts = posts });
+            var result = await _postService.RemovePost(id);
+            if (result)
+            {
+                _logger.LogWarning($"the user deleted post {id}");
+                return StatusCode(200);
+            }
+            else
+            {
+                return StatusCode(404);
+            }
         }
 
         [HttpGet]
-        [Route("Post/AllPosts")]
-        public async Task<IActionResult> AllPosts()
+        [Route("API/Post/AllPosts")]
+        public async Task<List<Post>> AllPosts()
         {
             var posts = await _postService.GetAllPosts();
-
-            return View(new AllPostsViewModel { Posts = posts });
+            return posts;
         }
 
         [HttpGet]
-        [Route("Post/PostsByAuthor")]
-        public async Task<IActionResult> PostsByAuthor(string id)
+        [Route("API/Post/PostsByAuthor")]
+        public async Task<PostsByAuthorViewModel> PostsByAuthor([FromBody] string id)
         {
             var posts = await _postService.GetPostsByAuthor(id);
 
-            return View(posts);
+            return posts;
         }
 
         [HttpGet]
-        [Route("Post/View")]
-        public async Task<IActionResult> ViewPost(string id)
+        [Route("API/Post/View")]
+        public async Task<PostViewModel> ViewPost([FromBody] string id)
         {
             var post = await _postService.ViewPost(id);
-            return View(post);
+            return post;
         }
 
         [HttpGet]
-        [Route("Post/ByTag")]
-        public async Task<IActionResult> PostsByTag(string id)
+        [Route("API/Post/ByTag")]
+        public async Task<PostsByTagViewModel> PostsByTag([FromBody] string id)
         {
             var posts = await _postService.GetPostsByTag(id);
-            return View(posts);
+            return posts;
         }
     }
 }
-*/

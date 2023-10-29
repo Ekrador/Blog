@@ -84,13 +84,12 @@ namespace API.Controllers
 
 
         [AuthorizationEditUser]
-        [Route("API/User/Edit/{id}")]
+        [Route("API/User/Edit")]
         [HttpPatch]
-        public async Task<IActionResult> Edit([FromRoute] string id, [FromBody] UserEditViewModel model)
+        public async Task<IActionResult> Edit([FromBody] UserEditViewModel model)
         {
             if (ModelState.IsValid)
             {
-                model.Id = id;
                 var result = await _userService.EditAccount(model);
                 if (result.Succeeded)
                 {

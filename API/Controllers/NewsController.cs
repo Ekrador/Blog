@@ -1,4 +1,4 @@
-﻿/*using BLL.Models.News;
+﻿using BLL.Models.News;
 using BLL.Services.IServices;
 using Blog;
 using DAL.Models;
@@ -20,19 +20,10 @@ namespace API.Controllers
             _logger = logger;
         }
 
-        [Authorize(Roles = "Администратор, Модератор")]
-        [HttpGet]
-        [Route("News/Add")]
-        public async Task<IActionResult> AddNews()
-        {
-            var model = _newsService.AddNews();
-            return View(model);
-        }
-
         [Authorize]
         [HttpPost]
-        [Route("News/Add")]
-        public async Task<IActionResult> AddNews(AddNewsViewModel model)
+        [Route("API/News/Add")]
+        public async Task<IActionResult> AddNews([FromBody] AddNewsViewModel model)
         {
             if (ModelState.IsValid)
             {
@@ -40,31 +31,20 @@ namespace API.Controllers
                 if (news != null)
                 {
                     _logger.LogInformation($"the user added new news {news}");
-                    return RedirectToAction("Index", "Home");
+                    return StatusCode(200);
                 }
                 else
                 {
                     ModelState.AddModelError("", "Некорректные данные");
                 }
             }
-            return RedirectToAction("AddNews");
-        }
-
-        [AuthorizationEditPost]
-        [HttpGet]
-        [Route("News/Edit/{id}")]
-        public async Task<IActionResult> EditNews(string id)
-        {
-            var model = await _newsService.EditNews(id);
-            if (model == null)
-                return StatusCode(404);
-            return View(model);
+            return StatusCode(400);
         }
 
         [Authorize]
-        [HttpPost]
-        [Route("News/Edit/{id}")]
-        public async Task<IActionResult> EditNews(EditNewsViewModel model)
+        [HttpPatch]
+        [Route("API/News/Edit")]
+        public async Task<IActionResult> EditNews([FromBody] EditNewsViewModel model)
         {
             if (ModelState.IsValid)
             {
@@ -72,34 +52,40 @@ namespace API.Controllers
                 if (result)
                 {
                     _logger.LogInformation($"the user edited news {model.Id}");
-                    return RedirectToAction("Index", "Home");
+                    return StatusCode(200);
                 }
                 else
                 {
                     ModelState.AddModelError("", "Некорректные данные");
                 }
             }
-            return View("EditPost", model);
+            return StatusCode(404);
         }
 
-        [HttpPost]
+        [HttpDelete]
         [AuthorizationEditPost]
-        [Route("News/RemoveNews/{id}")]
-        public async Task<IActionResult> RemoveNews(string id)
+        [Route("API/News/RemoveNews/{id}")]
+        public async Task<IActionResult> RemoveNews([FromRoute] string id)
         {
-            await _newsService.RemoveNews(id);
-            _logger.LogWarning($"the user deleted news {id}");
-            return RedirectToAction("Index", "Home");
+            var result = await _newsService.RemoveNews(id);
+            if (result)
+            {
+                _logger.LogWarning($"the user deleted news {id}");
+                return StatusCode(200);
+            }
+            else
+            {
+                return StatusCode(404);
+            }
         }
 
         [HttpGet]
-        [Route("News/AllNews")]
-        public async Task<IActionResult> AllNews()
+        [Route("API/News/AllNews")]
+        public async Task<List<News>> AllNews()
         {
             var news = await _newsService.AllNews();
 
-            return View(new AllNewsViewModel { News = news });
+            return news;
         }
     }
 }
-*/
