@@ -1,4 +1,5 @@
-﻿using BLL.Models.News;
+﻿using BLL.Contracts.Responses;
+using BLL.Models.News;
 using DAL.Models;
 using System;
 using System.Collections.Generic;
@@ -16,5 +17,6 @@ namespace BLL.Services.IServices
         Task<bool> EditNews(EditNewsViewModel model);
         Task<bool> RemoveNews(string id);
         Task<List<News>> AllNews();
+        Task<AllNewsResponse> AllNewsResponse();
     }
 }

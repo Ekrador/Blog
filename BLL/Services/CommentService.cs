@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using BLL.Contracts.Responses;
 using BLL.Extensions;
 using BLL.Models.Comments;
 using BLL.Models.Posts;
@@ -51,7 +52,7 @@ namespace BLL.Services
         public async Task<bool> EditComment(EditCommentViewModel model)
         {
             var comment = await _commentRep.Get(model.Id);
-            comment.Content = model.Content;
+            comment.Convert(model);
             return await _commentRep.Update(comment);
         }
 
@@ -65,6 +66,22 @@ namespace BLL.Services
             return comments.OrderByDescending(c => c.CreationDate).ToList();
         }
 
+        public async Task<AllCommentsResponse> GetAllCommentsResponse()
+        {
+            var comments = await _commentRep.GetAll();
+            foreach (var comment in comments)
+            {
+                await _commentRep.LoadAllNavigationPropertiesAsync(comment);
+            }
+            var sortedComments = comments.OrderByDescending(c => c.CreationDate).ToList();
+            var response = new AllCommentsResponse
+            {
+                CommentsAmount = comments.Count(),
+                Comments = _mapper.Map<List<Comment>, List<CommentViewResponse>>(sortedComments)
+            };
+            return response;
+        }
+
         public async Task<CommentsByAuthorViewModel> GetCommentsByAuthor(string authorId)
         {
             var allComments = await _commentRep.GetAll();
@@ -75,6 +92,22 @@ namespace BLL.Services
             var comments = allComments.Where(c => c.Author?.Id == authorId).OrderByDescending(с => с.CreationDate).ToList();
             var model = new CommentsByAuthorViewModel { Comments = comments, AuthorName = _userManager.FindByIdAsync(authorId).Result.GetFullName() };
             return model;
+        }
+
+        public async Task<AllCommentsResponse> GetCommentsByAuthorResponse(string authorId)
+        {
+            var allComments = await _commentRep.GetAll();
+            foreach (var comment in allComments)
+            {
+                await _commentRep.LoadAllNavigationPropertiesAsync(comment);
+            }
+            var comments = allComments.Where(c => c.Author?.Id == authorId).OrderByDescending(с => с.CreationDate).ToList();
+            var response = new AllCommentsResponse
+            {
+                CommentsAmount = comments.Count,
+                Comments = _mapper.Map<List<Comment>, List<CommentViewResponse>>(comments)
+            };
+            return response;
         }
 
         public async Task<bool> RemoveComment(string id)

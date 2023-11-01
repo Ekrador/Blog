@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace BLL.Models.Comments
@@ -13,6 +14,7 @@ namespace BLL.Models.Comments
         [DataType(DataType.Text)]
         [Display(Name = "Содержание", Prompt = "Содержание")]
         public string Content { get; set; }
-        public string Id { get; set; }
+        [JsonIgnore]
+        public string? Id { get; set; }
     }
 }

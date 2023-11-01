@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using BLL.Contracts.Responses;
+using BLL.Extensions;
 using BLL.Models.News;
 using BLL.Models.Posts;
 using BLL.Services.IServices;
@@ -10,21 +12,36 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace BLL.Services
 {
     public class NewsService : INewsService
     {
         private readonly IRepository<News> _newsRep;
-        public NewsService(IRepository<News> newsRep)
+        private readonly IMapper _mapper;
+        public NewsService(IRepository<News> newsRep, IMapper mapper)
         {
             _newsRep = newsRep;
+            _mapper = mapper;
         }
 
         public async Task<List<News>> AllNews()
         {
             var news = await _newsRep.GetAll();
             return news.ToList();
+        }
+
+        public async Task<AllNewsResponse> AllNewsResponse()
+        {
+            var news = await _newsRep.GetAll();
+            var sortedNews = news.OrderByDescending(c => c.CreationDate).ToList();
+            var response = new AllNewsResponse
+            {
+                NewsAmount = news.Count(),
+                News = _mapper.Map<List<News>, List<NewsViewResponse>>(sortedNews)
+            };
+            return response;
         }
 
         public async Task<string> AddNews(AddNewsViewModel model)
@@ -54,8 +71,7 @@ namespace BLL.Services
         public async Task<bool> EditNews(EditNewsViewModel model)
         {
             var news = await _newsRep.Get(model.Id);
-            news.Title = model.Title;
-            news.Content = model.Content;
+            news.Convert(model);
             return await _newsRep.Update(news);
         }
 

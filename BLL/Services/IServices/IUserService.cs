@@ -1,4 +1,5 @@
-﻿using BLL.Models.Users;
+﻿using BLL.Contracts.Responses;
+using BLL.Models.Users;
 using DAL.Models;
 using Microsoft.AspNetCore.Identity;
 using System;
@@ -16,9 +17,11 @@ namespace BLL.Services.IServices
         Task Logout();
         Task<UserEditViewModel> EditAccount(string id);
         Task<IdentityResult> EditAccount(UserEditViewModel model);
+        Task<IdentityResult> EditAccountFromApi(UserEditApiModel model);
         Task<IdentityResult> RemoveAccount(string id);
         Task<List<User>> GetAccounts();
-        Task<User> GetAccount(string id);
+        Task<AllUsersResponse> GetAccountsResponse();
+        Task<UserViewResponse> GetAccount(string id);
         Task<UserViewModel> UserPage(string id);
         Task AddPostClaim(User user, string postIdToClaim);
         Task AddCommentClaim(User user, string commentIdToClaim);

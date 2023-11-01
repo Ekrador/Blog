@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using BLL.Contracts.Responses;
 using BLL.Extensions;
 using BLL.Models.Roles;
 using BLL.Models.Users;
@@ -20,7 +21,7 @@ namespace BLL.Services
 {
     public class UserService : IUserService
     {
-        private IMapper _mapper;
+        private readonly IMapper _mapper;
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
         private readonly RoleManager<Role> _roleManager;
@@ -81,33 +82,59 @@ namespace BLL.Services
         public async Task<IdentityResult> EditAccount(UserEditViewModel model)
         {
             var user = await _userManager.FindByIdAsync(model.Id);
-            user.Convert(model);
-            if (model.NewPassword != null)
+            if (user != null)
             {
-                var changePasswordResult = await _userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
-                if (!changePasswordResult.Succeeded)
+                user.Convert(model);
+                if (model.NewPassword != null)
                 {
-                    return changePasswordResult;
+                    var changePasswordResult = await _userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
+                    if (!changePasswordResult.Succeeded)
+                    {
+                        return changePasswordResult;
+                    }
                 }
+                var result = await _userManager.UpdateAsync(user);
+                foreach (var role in model.Roles)
+                {
+                    if ((bool)role.IsChecked)
+                    {
+                        await _userManager.AddToRoleAsync(user, role.Name);
+                    }
+                    else
+                    {
+                        await _userManager.RemoveFromRoleAsync(user, role.Name);
+                    }
+                }
+                return result;
             }
-            var result = await _userManager.UpdateAsync(user);
-            foreach (var role in model.Roles)
-            {
-                if ((bool)role.IsChecked)
-                {
-                    await _userManager.AddToRoleAsync(user, role.Name);
-                }
-                else
-                {
-                    await _userManager.RemoveFromRoleAsync(user, role.Name);
-                }
-            }
-            return result;
+            else return IdentityResult.Failed(new IdentityError { Code = "404", Description = "Пользователь не найден" });
         }
 
-        public async Task<User> GetAccount(string id)
+        public async Task<IdentityResult> EditAccountFromApi(UserEditApiModel model)
         {
-            return await _userManager.FindByIdAsync(id);
+            var viewModel = _mapper.Map<UserEditViewModel>(model);
+            var roles = new List<RoleViewModel>();
+            foreach(var role in model.Roles)
+            {
+                var roleFromBD = await _roleManager.FindByNameAsync(role);
+                if (roleFromBD != null)
+                {
+                    var roleToModel = _mapper.Map<RoleViewModel>(roleFromBD);
+                    roleToModel.IsChecked = true;
+                    roles.Add(roleToModel);
+                }
+            }
+            viewModel.Roles = roles;
+            return await EditAccount(viewModel);
+        }
+
+        public async Task<UserViewResponse> GetAccount(string id)
+        {
+            var user =  await _userManager.FindByIdAsync(id);
+            var roles = await _userManager.GetRolesAsync(user);
+            var userView = _mapper.Map<UserViewResponse>(user);
+            userView.Roles = (List<string>)roles;
+            return userView;
         }
 
         public async Task<UserViewModel> UserPage(string id)
@@ -121,6 +148,25 @@ namespace BLL.Services
         {
             var accounts = _userManager.Users.Select(u => u).ToList();
             return accounts;
+        }
+
+        public async Task<AllUsersResponse> GetAccountsResponse()
+        {
+            var accounts = _userManager.Users.Select(u => u).ToList();
+            var usersView = new List<UserViewResponse>();
+            foreach(var user in accounts)
+            {
+                var roles = await _userManager.GetRolesAsync(user);
+                var userView = _mapper.Map<UserViewResponse>(user);
+                userView.Roles = (List<string>)roles;
+                usersView.Add(userView);
+            }
+            var response = new AllUsersResponse
+            {
+                UsersAmount = accounts.Count,
+                Users = usersView
+            };
+            return response;
         }
 
         public async Task<IdentityResult> Register(UserRegisterViewModel model)
@@ -140,7 +186,11 @@ namespace BLL.Services
         public async Task<IdentityResult> RemoveAccount(string id)
         {
             var user = await _userManager.FindByIdAsync(id);
-            if(_httpContextAccessor.HttpContext?.User.Identity.Name == user.UserName)
+            if(user == null)
+            {
+                return IdentityResult.Failed();
+            }
+            if(_httpContextAccessor.HttpContext?.User.Identity.Name == user.UserName )
             {
                 _signInManager.SignOutAsync();
             }

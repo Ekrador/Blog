@@ -1,4 +1,5 @@
-﻿using BLL.Models.Posts;
+﻿using BLL.Contracts.Responses;
+using BLL.Models.Posts;
 using BLL.Models.Tags;
 using DAL.Models;
 using System;
@@ -19,7 +20,9 @@ namespace BLL.Services.IServices
         Task<bool> RemoveTag(string id);
 
         Task<List<Tag>> GetAllTags();
+        Task<AllTagsResponse> GetAllTagsResponse();
 
         Task<Tag> GetTag(string id);
+        Task<TagViewResponse> GetTagResponse(string id);
     }
 }

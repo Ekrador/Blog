@@ -33,7 +33,7 @@ namespace DAL.Models
 
         public User()
         {
-            RegistrationDate = DateTime.Now;
+            RegistrationDate = DateTime.UtcNow;
             Posts = new List<Post>();
             Comments = new List<Comment>();
             Avatar = "../images/avatar.png";

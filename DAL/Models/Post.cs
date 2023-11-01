@@ -20,7 +20,7 @@ namespace DAL.Models
         public Post() 
         { 
             Id = Guid.NewGuid().ToString();
-            CreationDate = DateTime.Now;
+            CreationDate = DateTime.UtcNow;
         }
     }
 }

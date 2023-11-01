@@ -1,4 +1,5 @@
-﻿using BLL.Models.Comments;
+﻿using BLL.Contracts.Responses;
+using BLL.Models.Comments;
 using BLL.Models.Posts;
 using DAL.Models;
 using System;
@@ -16,7 +17,9 @@ namespace BLL.Services.IServices
         Task<EditCommentViewModel> EditComment(string id);
         Task<bool> RemoveComment(string id);
         Task<List<Comment>> GetAllComments();
+        Task<AllCommentsResponse> GetAllCommentsResponse();
         Task<CommentsByAuthorViewModel> GetCommentsByAuthor(string authorId);
+        Task<AllCommentsResponse> GetCommentsByAuthorResponse(string authorId);
         Task<CommentViewModel> ViewComment(string id);
     }
 }

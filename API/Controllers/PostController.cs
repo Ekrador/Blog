@@ -1,67 +1,89 @@
-﻿using BLL.Models.Posts;
+﻿using BLL.Contracts.Responses;
+using BLL.Models.Posts;
 using BLL.Services.IServices;
 using Blog;
 using DAL.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace API.Controllers
 {
+    /// <summary>
+    /// Контроллер статей
+    /// </summary>
     public class PostController : ControllerBase
     {
         private readonly IPostService _postService;
-        private readonly UserManager<User> _userManager;
         private readonly ILogger<PostController> _logger;
-        public PostController(IPostService postService, UserManager<User> userManager, ILogger<PostController> logger)
+        public PostController(IPostService postService, ILogger<PostController> logger)
         {
             _postService = postService;
-            _userManager = userManager;
             _logger = logger;
         }
 
+        /// <summary>
+        /// Создать новую статью
+        /// </summary>
+        /// <remarks>Требуется вход в систему</remarks>
+        /// <param name="model">Данные в формате JSON</param>
         [Authorize]
         [HttpPost]
         [Route("API/Post/Create")]
-        public async Task<IActionResult> CreatePost([FromBody] CreatePostViewModel model)
+        public async Task<IActionResult> CreatePost([FromBody] CreatePostApiModel model)
         {
             if (ModelState.IsValid)
             {
-                var post = await _postService.CreatePost(model);
+                model.AuthorId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var post = await _postService.CreatePostApi(model);
                 if (post != null)
                 {
                     _logger.LogInformation($"the user wrote a new post {post}");
-                    return StatusCode(200);
+                    return StatusCode(200, $"Добавлена статья {post}");
                 }
                 else
                 {
                     ModelState.AddModelError("", "Некорректные данные");
                 }
             }
-            return StatusCode(400);
+            return BadRequest(model);
         }
+
+        /// <summary>
+        /// Редактировать статью
+        /// </summary>
+        /// <remarks>Требуется вход в систему под автором статьи или администратором/модератором</remarks>
+        /// <param name="id">Id статьи</param>
+        /// <param name="model">Данные в формате JSON</param>
 
         [AuthorizationEditPost]
         [HttpPatch]
-        [Route("API/Post/Edit")]
-        public async Task<IActionResult> EditPost([FromBody] EditPostViewModel model)
+        [Route("API/Post/Edit/{id}")]
+        public async Task<IActionResult> EditPost([FromRoute] string id, [FromBody] EditPostApiModel model)
         {
             if (ModelState.IsValid)
             {
-                var result = await _postService.EditPost(model);
+                model.Id = id;
+                var result = await _postService.EditPostFromApi(model);
                 if (result)
                 {
-                    _logger.LogInformation($"the user edited post {model.Id}");
-                    return StatusCode(200);
+                    _logger.LogInformation($"the user {User.FindFirst(ClaimTypes.NameIdentifier)?.Value} edited post {model.Id}");
+                    return StatusCode(200, $"Пользователем {User.FindFirst(ClaimTypes.NameIdentifier)?.Value} изменена статья {model.Id}");
                 }
                 else
                 {
                     ModelState.AddModelError("", "Некорректные данные");
                 }
             }
-            return StatusCode(404);
+            return BadRequest(model);
         }
 
+        /// <summary>
+        /// Удалить статью
+        /// </summary>
+        /// <remarks>Требуется вход в систему под автором статьи или администратором/модератором</remarks>
+        /// <param name="id">Id статьи</param>
         [HttpDelete]
         [AuthorizationEditPost]
         [Route("API/Post/RemovePost/{id}")]
@@ -70,45 +92,59 @@ namespace API.Controllers
             var result = await _postService.RemovePost(id);
             if (result)
             {
-                _logger.LogWarning($"the user deleted post {id}");
-                return StatusCode(200);
+                _logger.LogWarning($"the user {User.FindFirst(ClaimTypes.NameIdentifier)?.Value} deleted post {id}");
+                return StatusCode(200, $"Пользователем {User.FindFirst(ClaimTypes.NameIdentifier)?.Value} удалена статья {id}");
             }
             else
             {
-                return StatusCode(404);
+                return BadRequest();
             }
         }
 
+        /// <summary>
+        /// Список всех сатей
+        /// </summary>
         [HttpGet]
         [Route("API/Post/AllPosts")]
-        public async Task<List<Post>> AllPosts()
+        public async Task<AllPostsResponse> AllPosts()
         {
-            var posts = await _postService.GetAllPosts();
+            var posts = await _postService.GetAllPostsResponse();
             return posts;
         }
 
+        /// <summary>
+        /// Список всех сатей пользователя
+        /// </summary>
+        /// <param name="id">Id пользователя</param>
         [HttpGet]
-        [Route("API/Post/PostsByAuthor")]
-        public async Task<PostsByAuthorViewModel> PostsByAuthor([FromBody] string id)
+        [Route("API/Post/PostsByAuthor/{id}")]
+        public async Task<AllPostsResponse> PostsByAuthor([FromRoute] string id)
         {
-            var posts = await _postService.GetPostsByAuthor(id);
-
+            var posts = await _postService.GetPostsByAuthorResponse(id);
             return posts;
         }
 
+        /// <summary>
+        /// Информация о статье 
+        /// </summary>
+        /// <param name="id">Id статьи</param>
         [HttpGet]
-        [Route("API/Post/View")]
-        public async Task<PostViewModel> ViewPost([FromBody] string id)
+        [Route("API/Post/View/{id}")]
+        public async Task<PostViewResponse> ViewPost([FromRoute] string id)
         {
-            var post = await _postService.ViewPost(id);
+            var post = await _postService.ViewPostResponse(id);
             return post;
         }
 
+        /// <summary>
+        /// Список всех сатей с тегом
+        /// </summary>
+        /// <param name="id">Id тега</param>
         [HttpGet]
-        [Route("API/Post/ByTag")]
-        public async Task<PostsByTagViewModel> PostsByTag([FromBody] string id)
+        [Route("API/Post/ByTag/{id}")]
+        public async Task<AllPostsResponse> PostsByTag([FromRoute] string id)
         {
-            var posts = await _postService.GetPostsByTag(id);
+            var posts = await _postService.GetPostsByTagResponse(id);
             return posts;
         }
     }

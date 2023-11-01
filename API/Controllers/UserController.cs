@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using BLL.Contracts.Responses;
 using BLL.Models.Users;
 using BLL.Services.IServices;
 using Blog;
@@ -9,6 +10,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
+    /// <summary>
+    /// Контроллер пользователей
+    /// </summary>
     public class UserController : ControllerBase
     {
         private readonly IMapper _mapper;
@@ -26,9 +30,12 @@ namespace API.Controllers
             _logger = logger;
         }
 
+        /// <summary>
+        /// Вход в систему
+        /// </summary>
+        /// <param name="model">Данные в формате JSON</param>
         [Route("API/User/Authenticate")]
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Authenticate([FromBody] UserLoginViewModel model)
         {
             if (ModelState.IsValid)
@@ -38,17 +45,19 @@ namespace API.Controllers
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("пользователь успешно вошел в систему");
-                    return StatusCode(200);
+                    return StatusCode(200, "Успешный вход в систему!");
                 }
                 else
                 {
                     ModelState.AddModelError("", "Неправильный логин и (или) пароль");
                 }
             }
-            ModelState.AddModelError("", "Некорректные данные");
-            return StatusCode(400);
+            return BadRequest(ModelState);
         }
 
+        /// <summary>
+        /// Выход из системы
+        /// </summary>
         [HttpPost]
         [Authorize]
         [Route("API/User/Logout")]
@@ -56,9 +65,13 @@ namespace API.Controllers
         {
             await _userService.Logout();
             _logger.LogInformation("пользователь вышел из системы");
-            return StatusCode(200);
+            return StatusCode(200, "Выход из системы");
         }
 
+        /// <summary>
+        /// Регистрация нового пользователя
+        /// </summary>
+        /// <param name="model">Данные в формате JSON</param>
         [HttpPost]
         [Route("API/User/Register")]
         public async Task<IActionResult> RegisterAccount([FromBody] UserRegisterViewModel model)
@@ -69,7 +82,7 @@ namespace API.Controllers
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("создан новый аккаунт");
-                    return StatusCode(200);
+                    return StatusCode(200, "Создан новый аккаунт");
                 }
                 else
                 {
@@ -79,22 +92,28 @@ namespace API.Controllers
                     }
                 }
             }
-            return StatusCode(400);
+            return BadRequest(ModelState);
         }
 
-
+        /// <summary>
+        /// Редактировать пользователя
+        /// </summary>
+        /// <remarks>Требуется вход в систему под владельцем аккаунта или администратором/модератором</remarks>
+        /// <param name="id">Id пользователя</param>
+        /// <param name="model">Данные в формате JSON</param>
         [AuthorizationEditUser]
-        [Route("API/User/Edit")]
+        [Route("API/User/Edit/{id}")]
         [HttpPatch]
-        public async Task<IActionResult> Edit([FromBody] UserEditViewModel model)
+        public async Task<IActionResult> Edit([FromRoute] string id, [FromBody] UserEditApiModel model)
         {
             if (ModelState.IsValid)
             {
-                var result = await _userService.EditAccount(model);
+                model.Id = id;
+                var result = await _userService.EditAccountFromApi(model);
                 if (result.Succeeded)
                 {
                     _logger.LogInformation($"информация пользователя изменена: {model.Id}");
-                    return StatusCode(200);
+                    return StatusCode(200, $"Информация пользователя изменена: {model.Id}");
                 }
                 else
                 {
@@ -104,10 +123,15 @@ namespace API.Controllers
                     }
                 }
             }
-            return StatusCode(404);
+            return BadRequest(ModelState);
         }
 
-        [Authorize]
+        /// <summary>
+        /// Удалить пользователя
+        /// </summary>
+        /// <remarks>Требуется вход в систему под владельцем аккаунта или администратором/модератором</remarks>
+        /// <param name="id">Id пользователя</param>
+        [AuthorizationEditUser]
         [HttpDelete]
         [Route("API/User/RemoveAccount/{id}")]
         public async Task<IActionResult> RemoveAccount([FromRoute]string id)
@@ -116,26 +140,35 @@ namespace API.Controllers
             if (result.Succeeded)
             {
                 _logger.LogWarning($"аккаунт удален: {id}");
-                return StatusCode(200);
+                return StatusCode(200, $"Аккаунт удален: {id}");
             }
             else
             {
-                return StatusCode(404);
+                return StatusCode(404, "Пользователь с таким Id не найден");
             }
         }
+
+        /// <summary>
+        /// Список пользователей
+        /// </summary>
         [HttpGet]
         [Route("API/User/AllAccounts")]
-        public async Task<List<User>> AllUsers()
+        public async Task<AllUsersResponse> AllUsersResponse()
         {
-            var users = await _userService.GetAccounts();
+            var users = await _userService.GetAccountsResponse();
             return users;
         }
 
+        /// <summary>
+        /// Информация о пользователе
+        /// </summary>
+        /// <param name="id">Id пользователя</param>
         [HttpGet]
         [Route("API/User/View/{id}")]
-        public async Task<User> UserById([FromRoute] string id)
+        public async Task<UserViewResponse> UserById([FromRoute] string id)
         {
             var user = await _userService.GetAccount(id);
+            
             return user;
         }
     }

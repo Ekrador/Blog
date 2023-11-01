@@ -9,6 +9,6 @@ namespace BLL.Models.Tags
 {
     public class EditTagViewModel : CreateTagViewModel
     {
-        public string Id { get; set; }
+        public string? Id { get; set; }
     }
 }

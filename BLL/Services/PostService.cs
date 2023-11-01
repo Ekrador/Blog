@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
+using BLL.Contracts.Responses;
 using BLL.Extensions;
 using BLL.Models.Comments;
 using BLL.Models.Posts;
 using BLL.Models.Roles;
 using BLL.Models.Tags;
+using BLL.Models.Users;
 using BLL.Services.IServices;
 using DAL.Models;
 using DAL.Repositories;
@@ -74,6 +76,31 @@ namespace BLL.Services
             return null;
         }
 
+        public async Task<string> CreatePostApi(CreatePostApiModel model)
+        {
+            var viewModel = _mapper.Map<CreatePostViewModel>(model);
+            List<Tag> selectedTags = new();
+            if (model.Tags != null)
+            {
+                foreach (var tag in model.Tags)
+                {
+                    var dbTags = await _tagRep.GetAll();
+                    selectedTags = dbTags.Where(t => t.Name.Equals(tag)).ToList();
+                }
+            }
+            var post = _mapper.Map<Post>(viewModel);
+            post.Tags = selectedTags;
+            post.Author = _userManager.FindByIdAsync(model.AuthorId).Result;
+            var result = await _postRep.Create(post);
+            if (result)
+            {
+                await _userService.AddPostClaim(post.Author, post.Id);
+                await _signInManager.SignInAsync(post.Author, true);
+                return post.Id;
+            }
+            return null;
+        }
+
         public async Task<EditPostViewModel> EditPost(string id)
         {
             EditPostViewModel postModel = null;
@@ -119,6 +146,25 @@ namespace BLL.Services
             return await _postRep.Update(post);
         }
 
+        public async Task<bool> EditPostFromApi(EditPostApiModel model)
+        {
+            var tags = new List<TagViewModel>();
+            var allTags = await _tagRep.GetAll();
+            foreach (var tag in model.Tags)
+            {
+                var tagFromBD = allTags.Where(t => t.Name == tag).FirstOrDefault();
+                if (tagFromBD != null)
+                {
+                    var tagToModel = _mapper.Map<TagViewModel>(tagFromBD);
+                    tagToModel.IsChecked = true;
+                    tags.Add(tagToModel);
+                }
+            }
+            var viewModel = _mapper.Map<EditPostViewModel>(model);
+            viewModel.Tags = tags;
+            return await EditPost(viewModel);
+        }
+
         public async Task<List<Post>> GetAllPosts()
         {
             var posts = await _postRep.GetAll();
@@ -128,6 +174,22 @@ namespace BLL.Services
                     await _postRep.LoadAllNavigationPropertiesAsync(post);
             }
             return posts?.OrderByDescending(с => с.ViewCount).ToList();
+        }
+
+        public async Task<AllPostsResponse> GetAllPostsResponse()
+        {
+            var posts = await _postRep.GetAll();
+            var response = new AllPostsResponse();
+            if (posts != null)
+            {
+                foreach (var post in posts)
+                {
+                    await _postRep.LoadAllNavigationPropertiesAsync(post);
+                }
+                response.PostsAmount = posts.Count();
+                response.Posts = _mapper.Map<List<Post>, List<PostViewResponse>>(posts.ToList());
+            }
+            return response;
         }
 
         public async Task<List<Post>> GetAuthorsPosts(string authorId)
@@ -155,6 +217,21 @@ namespace BLL.Services
             return model;
         }
 
+        public async Task<PostViewResponse> ViewPostResponse(string id)
+        {
+            var post = await _postRep.Get(id);
+            if (post != null)
+            {
+                await _postRep.LoadAllNavigationPropertiesAsync(post);
+                foreach (var comment in post.Comments)
+                {
+                    await _commentRep.LoadAllNavigationPropertiesAsync(comment);
+                }
+            }
+            var postView = _mapper.Map<PostViewResponse>(post);
+            return postView;
+        }
+
         public async Task<bool> RemovePost(string id)
         {
             var post = await _postRep.Get(id);
@@ -174,6 +251,23 @@ namespace BLL.Services
             return model;
         }
 
+        public async Task<AllPostsResponse> GetPostsByTagResponse(string id)
+        {
+            var tag = await _tagRep.Get(id);
+            var allPosts = await _postRep.GetAll();
+            foreach (var post in allPosts)
+            {
+                await _postRep.LoadAllNavigationPropertiesAsync(post);
+            }
+            var posts = allPosts.Where(p => p.Tags.Contains(tag)).OrderByDescending(с => с.ViewCount).ToList();
+            var response = new AllPostsResponse
+            {
+                PostsAmount = posts.Count,
+                Posts = _mapper.Map<List<Post>, List<PostViewResponse>>(posts)
+            };
+            return response;
+        }
+
         public async Task<PostsByAuthorViewModel> GetPostsByAuthor(string authorId)
         {
             var allPosts = await _postRep.GetAll();
@@ -184,6 +278,22 @@ namespace BLL.Services
             var posts = allPosts.Where(p => p.Author?.Id == authorId).OrderByDescending(с => с.ViewCount).ToList();
             var model = new PostsByAuthorViewModel { Posts = posts, AuthorName = _userManager.FindByIdAsync(authorId).Result.GetFullName() };
             return model;
+        }
+
+        public async Task<AllPostsResponse> GetPostsByAuthorResponse(string authorId)
+        {
+            var allPosts = await _postRep.GetAll();
+            foreach (var post in allPosts)
+            {
+                await _postRep.LoadAllNavigationPropertiesAsync(post);
+            }
+            var posts = allPosts.Where(p => p.Author?.Id == authorId).OrderByDescending(с => с.ViewCount).ToList();
+            var response = new AllPostsResponse
+            {
+                PostsAmount = posts.Count,
+                Posts = _mapper.Map<List<Post>, List<PostViewResponse>>(posts)
+            };
+            return response;
         }
 
         public async Task<Post> GetPostById(string id)

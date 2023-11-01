@@ -9,7 +9,7 @@ namespace DAL.Models
     public class Comment
     {
         public string Id { get; set; }
-        public DateTime CreationDate { get; set; } = DateTime.Now;
+        public DateTime CreationDate { get; set; } = DateTime.UtcNow;
         public string Content { get; set; }
         public User Author { get; set; }
         public Post Post { get; set; }

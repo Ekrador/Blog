@@ -1,4 +1,5 @@
-﻿using BLL.Models.Roles;
+﻿using BLL.Contracts.Responses;
+using BLL.Models.Roles;
 using BLL.Models.Users;
 using DAL.Models;
 using Microsoft.AspNetCore.Identity;
@@ -17,6 +18,8 @@ namespace BLL.Services.IServices
         Task<IdentityResult> EditRole(EditRoleViewModel model);
         Task<IdentityResult> RemoveRole(string id);
         Task<List<Role>> GetAllRoles();
+        Task<AllRolesResponse> GetAllRolesResponse();
         Task<RoleViewModel> ViewRole(string id);
+        Task<RoleViewResponse> ViewRoleResponse(string id);
     }
 }

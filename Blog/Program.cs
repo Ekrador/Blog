@@ -83,6 +83,7 @@ namespace Blog
             {
                 loggingBuilder.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace);
                 loggingBuilder.AddNLog();
+                NLog.LogManager.Setup().LoadConfiguration(builder => builder.SetTimeSource(new NLog.Time.AccurateUtcTimeSource()));
             });
             var app = builder.Build();
 
